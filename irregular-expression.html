@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Irregular Expression — Pull signal from noise.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="irregular-expression.css" />
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════
+       TITLE SCREEN
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-title" class="screen active">
+    <div class="title-scanline"></div>
+    <div class="title-content">
+      <div class="title-eyebrow">IRREGULAR EXPRESSION</div>
+      <div class="title-logo">IrregEx</div>
+      <div class="title-tagline">Pull signal from noise.</div>
+      <nav class="title-nav">
+        <button class="btn btn-primary" data-goto="screen-map">CAMPAIGN</button>
+        <button class="btn btn-secondary" data-goto="screen-leaderboard">LEADERBOARD</button>
+        <button class="btn btn-secondary" data-goto="screen-regularcade">REGULARCADE</button>
+        <button class="btn btn-secondary" data-goto="screen-gallery">GALLERY</button>
+      </nav>
+      <div class="title-xp-badge" id="title-xp-badge"></div>
+    </div>
+    <div class="title-footer">
+      <span class="mono muted">v1.0.0-prototype</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       CAMPAIGN MAP SCREEN
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-map" class="screen">
+    <header class="screen-header">
+      <button class="btn btn-ghost btn-back" data-goto="screen-title">← BACK</button>
+      <span class="screen-title-text">CAMPAIGN MAP</span>
+      <span class="xp-counter mono" id="map-xp">XP: 0</span>
+    </header>
+    <div class="world-narrative-band" id="world-narrative-band">
+      <span class="world-narrative-text" id="world-narrative-text"></span>
+    </div>
+    <div class="map-container">
+      <svg id="map-svg" class="map-svg" viewBox="0 0 900 600" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       CHALLENGE SCREEN
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-challenge" class="screen">
+    <header class="screen-header">
+      <button class="btn btn-ghost btn-back" id="challenge-back-btn">← MAP</button>
+      <span class="screen-title-text" id="challenge-world-title"></span>
+      <span class="xp-counter mono" id="challenge-xp">XP: 0</span>
+    </header>
+
+    <div class="challenge-layout">
+      <div class="challenge-meta">
+        <span class="challenge-id mono" id="challenge-id"></span>
+        <span class="challenge-title-text" id="challenge-title"></span>
+        <span class="challenge-type-badge" id="challenge-type-badge"></span>
+      </div>
+
+      <section class="challenge-briefing">
+        <div class="section-label">BRIEFING</div>
+        <div class="briefing-text" id="briefing-text"></div>
+      </section>
+
+      <section class="learn-more-section" id="learn-more-section" hidden>
+        <button class="btn-learn-more" id="learn-more-toggle" aria-expanded="false">
+          LEARN MORE <span class="learn-more-chevron" id="learn-more-chevron">▼</span>
+        </button>
+        <div class="learn-more-panel" id="learn-more-panel" hidden>
+          <div class="section-label">CONCEPT</div>
+          <div class="learn-more-text" id="learn-more-text"></div>
+        </div>
+      </section>
+
+      <section class="challenge-corpus">
+        <div class="section-label">CORPUS</div>
+        <div class="corpus-lines" id="corpus-lines"></div>
+      </section>
+
+      <section class="challenge-input-area">
+        <div class="section-label">YOUR PATTERN</div>
+        <div class="input-row">
+          <input
+            type="text"
+            id="regex-input"
+            class="regex-input mono"
+            placeholder="enter pattern…"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+          />
+          <span class="char-counter mono" id="char-counter">0 chars | par: —</span>
+          <span class="locked-in-indicator" id="locked-in" aria-live="polite"></span>
+        </div>
+        <div class="regex-error mono" id="regex-error" aria-live="assertive"></div>
+      </section>
+
+      <div class="challenge-actions">
+        <button class="btn btn-hint" id="hint-btn">HINT <span id="hint-cost"></span></button>
+        <div class="action-spacer"></div>
+        <button class="btn btn-secondary" id="test-btn">TEST</button>
+        <button class="btn btn-primary" id="submit-btn">SUBMIT</button>
+      </div>
+
+      <div class="hint-panel" id="hint-panel" hidden>
+        <div class="section-label">HINT</div>
+        <div class="hint-text" id="hint-text"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       SUCCESS SCREEN
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-success" class="screen">
+    <div class="result-screen success-screen">
+      <div class="result-header">
+        <div class="result-status-label success-label">PATTERN CONFIRMED</div>
+        <div class="result-challenge-id mono" id="success-challenge-id"></div>
+      </div>
+
+      <div class="concept-debrief-card" id="concept-debrief-card">
+        <div class="section-label">DEBRIEF</div>
+        <div class="concept-note-text" id="concept-note-text"></div>
+      </div>
+
+      <div class="reference-solution-card" id="reference-solution-card" hidden>
+        <div class="section-label">REFERENCE PATTERN</div>
+        <code class="reference-solution-code mono" id="reference-solution-code"></code>
+      </div>
+
+      <div class="xp-breakdown">
+        <div class="section-label">XP AWARDED</div>
+        <div class="xp-row" id="xp-base-row">
+          <span class="xp-label">Base XP</span>
+          <span class="xp-value mono" id="xp-base-val"></span>
+        </div>
+        <div class="xp-row xp-bonus-row" id="xp-par-row">
+          <span class="xp-label">Under par! <span class="mono" id="par-comparison"></span></span>
+          <span class="xp-value xp-gold mono" id="xp-par-val"></span>
+        </div>
+        <div class="xp-row xp-penalty-row" id="xp-hint-row">
+          <span class="xp-label">Hint used</span>
+          <span class="xp-value xp-red mono" id="xp-hint-val"></span>
+        </div>
+        <div class="xp-divider"></div>
+        <div class="xp-row xp-total-row">
+          <span class="xp-label">This challenge</span>
+          <span class="xp-value xp-total mono" id="xp-challenge-total"></span>
+        </div>
+        <div class="xp-row">
+          <span class="xp-label">Running total</span>
+          <span class="xp-value mono" id="xp-running-total"></span>
+        </div>
+      </div>
+
+      <div class="par-line mono" id="par-line"></div>
+
+      <button class="btn btn-primary btn-wide" id="success-continue-btn">CONTINUE →</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       FAILURE SCREEN
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-failure" class="screen">
+    <div class="result-screen failure-screen">
+      <div class="result-header">
+        <div class="result-status-label failure-label">PATTERN REJECTED</div>
+        <div class="result-challenge-id mono" id="failure-challenge-id"></div>
+      </div>
+
+      <div class="failure-details" id="failure-details"></div>
+
+      <div class="challenge-actions">
+        <button class="btn btn-secondary" id="failure-retry-btn">RETRY</button>
+        <button class="btn btn-hint" id="failure-hint-btn">HINT <span id="failure-hint-cost"></span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       WORLD COMPLETE SCREEN
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-world-complete" class="screen">
+    <div class="result-screen world-complete-screen">
+      <div class="world-complete-icon">◈</div>
+      <div class="result-status-label success-label">WORLD COMPLETE</div>
+      <div class="world-complete-title" id="world-complete-title"></div>
+      <div class="world-complete-xp mono" id="world-complete-xp"></div>
+      <button class="btn btn-primary btn-wide" id="world-continue-btn" data-goto="screen-map">BACK TO MAP →</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       LEADERBOARD SCREEN (stub)
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-leaderboard" class="screen">
+    <header class="screen-header">
+      <button class="btn btn-ghost btn-back" data-goto="screen-title">← BACK</button>
+      <span class="screen-title-text">LEADERBOARD</span>
+      <span></span>
+    </header>
+    <div class="leaderboard-container">
+      <div class="stub-badge mono">v1 STUB — seeded data</div>
+      <table class="leaderboard-table" id="leaderboard-table">
+        <thead>
+          <tr>
+            <th class="mono">RANK</th>
+            <th>HANDLE</th>
+            <th class="mono">XP</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboard-body"></tbody>
+      </table>
+      <div class="stub-note mono">
+        <!-- STUB: Replace tbody with GET /api/leaderboard in v2.
+             Pass auth: Authorization: Bearer &lt;token&gt;
+             Expected shape: [{ rank, name, xp }] -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       REGULARCADE SCREEN (stub)
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-regularcade" class="screen">
+    <header class="screen-header">
+      <button class="btn btn-ghost btn-back" data-goto="screen-title">← BACK</button>
+      <span class="screen-title-text">REGULARCADE</span>
+      <span></span>
+    </header>
+    <div class="stub-screen-content">
+      <div class="stub-lock-icon">⊘</div>
+      <div class="stub-screen-title">REGULARCADE</div>
+      <div class="stub-screen-sub">Arcade of skill-specific mini-games</div>
+      <div class="stub-unlock-msg" id="regularcade-unlock-msg">Unlocks after completing the campaign. You're 0% there.</div>
+      <div class="arcade-tiles">
+        <div class="arcade-tile locked">
+          <div class="arcade-tile-icon">▣</div>
+          <div class="arcade-tile-name">Corpus Match</div>
+          <div class="arcade-tile-desc">Write patterns. No narrative. Pure signal.</div>
+        </div>
+        <div class="arcade-tile locked">
+          <div class="arcade-tile-icon">⏱</div>
+          <div class="arcade-tile-name">Timed Drill</div>
+          <div class="arcade-tile-desc">Race the clock on a rapid-fire corpus set.</div>
+        </div>
+        <div class="arcade-tile locked">
+          <div class="arcade-tile-icon">⚔</div>
+          <div class="arcade-tile-name">Head-to-Head</div>
+          <div class="arcade-tile-desc">Live opponent, same corpus, fastest correct answer wins. <em>Requires account.</em></div>
+        </div>
+        <div class="arcade-tile locked">
+          <div class="arcade-tile-icon">⊞</div>
+          <div class="arcade-tile-name">Regex Crossword</div>
+          <div class="arcade-tile-desc">Every row and column must satisfy its own pattern.</div>
+        </div>
+        <div class="arcade-tile locked">
+          <div class="arcade-tile-icon">✦</div>
+          <div class="arcade-tile-name">Pattern Surgeon</div>
+          <div class="arcade-tile-desc">Identify and repair a broken pattern using regex itself.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       GALLERY SCREEN (stub)
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-gallery" class="screen">
+    <header class="screen-header">
+      <button class="btn btn-ghost btn-back" data-goto="screen-title">← BACK</button>
+      <span class="screen-title-text">GALLERY</span>
+      <span></span>
+    </header>
+    <div class="stub-screen-content">
+      <div class="stub-lock-icon">⊘</div>
+      <div class="stub-screen-title">THE GALLERY</div>
+      <div class="stub-screen-sub">Community regex submissions presented as framed works of art.</div>
+      <div class="gallery-halls">
+        <div class="gallery-hall-card">
+          <div class="gallery-hall-name">The Classics</div>
+          <div class="gallery-hall-desc">Timeless patterns every practitioner knows.</div>
+        </div>
+        <div class="gallery-hall-card">
+          <div class="gallery-hall-name">The Curiosities</div>
+          <div class="gallery-hall-desc">Strange, surprising, borderline-beautiful patterns.</div>
+        </div>
+        <div class="gallery-hall-card">
+          <div class="gallery-hall-name">The Workhorses</div>
+          <div class="gallery-hall-desc">Practical patterns earning their keep in production.</div>
+        </div>
+        <div class="gallery-hall-card">
+          <div class="gallery-hall-name">The Miniaturists</div>
+          <div class="gallery-hall-desc">Maximum expressiveness, minimum characters.</div>
+        </div>
+      </div>
+      <div class="stub-coming-soon mono">— COMING SOON —</div>
+    </div>
+  </div>
+
+  <script src="irregular-expression.js"></script>
+</body>
+</html>
