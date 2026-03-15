@@ -242,16 +242,17 @@ html, body {
   flex: 1;
   display: flex;
   align-items: center;
-  justify-content: center;
   padding: 24px;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .map-svg {
+  min-width: 900px;
   width: 100%;
-  max-width: 900px;
   height: auto;
   max-height: calc(100vh - 80px);
+  flex-shrink: 0;
 }
 
 /* SVG node styles (applied via JS) */

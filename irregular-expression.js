@@ -252,6 +252,246 @@ const CAMPAIGN = [
 
     ] // end challenges
   }  // end world-1
+  ,
+
+  // ═══════════════════════════════════════════════════
+  //  WORLD 2
+  // ═══════════════════════════════════════════════════
+  {
+    id: "world-2",
+    title: "Data Extraction Bureau",
+    subtitle: "Structure the signal.",
+    narrative: "The anomaly is confirmed. The Bureau of Signal Intelligence has assumed control of the decryption effort. The transmission contains structured data — field codes, payloads, validity markers. Your tools are the same. The noise is different.",
+    conceptsIntroduced: ["character classes []", "ranges [a-z] [A-Z] [0-9]", "shorthand \\d \\w \\s", "negated classes [^]"],
+    challenges: [
+
+      // ─── Challenge 2-1 ──────────────────────────────
+      {
+        id: "2-1",
+        title: "Valid Bands",
+        briefing: "The relay array received signals on seven frequency bands. Bureau protocol only processes four: L, S, X, and C. Filter out the rest.",
+        scenario: "The relay station logs are mixed. Non-standard bands weren't part of the observation window and must be excluded before the batch hits the processing pipeline.",
+        learnMore: "A character class [abc] matches any single character from the listed set.\n\n[LSXC] matches L, S, X, or C — exactly one character from that group.\n\nOrder inside the brackets doesn't matter. [LSXC] and [CXSL] are identical.\n\nThis is more precise than (L|S|X|C) and more readable for character-level choices.",
+        type: "match",
+        corpus: [
+          "BAND_L: 1420 MHz hydrogen line candidate",
+          "BAND_S: 2.4 GHz sweep complete",
+          "BAND_X: 10.5 GHz anomaly flagged",
+          "BAND_C: 5.8 GHz carrier detected",
+          "BAND_K: 18 GHz no signal",
+          "BAND_Q: 45 GHz calibration fault",
+          "SATELLITE_XS3: telemetry packet received"
+        ],
+        mustMatch: [
+          "BAND_L: 1420 MHz hydrogen line candidate",
+          "BAND_S: 2.4 GHz sweep complete",
+          "BAND_X: 10.5 GHz anomaly flagged",
+          "BAND_C: 5.8 GHz carrier detected"
+        ],
+        mustNotMatch: [
+          "BAND_K: 18 GHz no signal",
+          "BAND_Q: 45 GHz calibration fault",
+          "SATELLITE_XS3: telemetry packet received"
+        ],
+        par: 7,
+        baseXP: 75,
+        parBonusXP: 25,
+        referenceSolution: "BAND_[LSXC]",
+        hint: "A character class lets you list the exact characters you want to accept — no more, no less.",
+        hintCost: 10,
+        conceptNote: "Character classes [abc] match any one character from the set. [LSXC] is more precise than .* and more compact than four separate alternatives.",
+        isSideChallenge: false,
+        isBoss: false
+      },
+
+      // ─── Challenge 2-2 ──────────────────────────────
+      {
+        id: "2-2",
+        title: "Lower Register",
+        briefing: "Bureau sector codes are always lowercase letters. Entries using uppercase or mixed-case codes are from the legacy admin system. Match only valid signal sectors.",
+        scenario: "Two systems are writing to the same log. The downstream parser only handles the lowercase sector identifiers — admin entries would corrupt the analysis run.",
+        learnMore: "A range like [a-z] matches any single lowercase letter. [A-Z] matches any uppercase letter. [0-9] is equivalent to \\d.\n\nRanges work because letters and digits have a defined order in ASCII/Unicode. [a-z] means 'any character from a to z inclusive.'\n\nYou can combine ranges and literals in one class: [a-zA-Z0-9] matches any alphanumeric character.",
+        type: "match",
+        corpus: [
+          "SECTOR_alpha: signal detected",
+          "SECTOR_beta: no signal",
+          "SECTOR_gamma: weak signal",
+          "SECTOR_ALPHA: admin override",
+          "SECTOR_Beta: entry malformed",
+          "SECTOR_s1gma: entry malformed"
+        ],
+        mustMatch: [
+          "SECTOR_alpha: signal detected",
+          "SECTOR_beta: no signal",
+          "SECTOR_gamma: weak signal"
+        ],
+        mustNotMatch: [
+          "SECTOR_ALPHA: admin override",
+          "SECTOR_Beta: entry malformed",
+          "SECTOR_s1gma: entry malformed"
+        ],
+        par: 8,
+        baseXP: 75,
+        parBonusXP: 25,
+        referenceSolution: "_[a-z]+:",
+        hint: "A range like [a-z] matches any single lowercase letter. + means one or more.",
+        hintCost: 10,
+        conceptNote: "[a-z]+ matches one or more consecutive lowercase letters. The range is more compact than listing every letter. Uppercase and digit characters fall outside it.",
+        isSideChallenge: false,
+        isBoss: false
+      },
+
+      // ─── Challenge 2-3 ──────────────────────────────
+      {
+        id: "2-3",
+        title: "Word Characters",
+        briefing: "Calibration records store values as #key#value pairs. Valid keys use only letters, digits, and underscores. Find the well-formed records.",
+        scenario: "A sensor batch arrived with inconsistent key formatting. Only records with properly-formed keys can be trusted for downstream analysis.",
+        learnMore: "\\w is shorthand for [a-zA-Z0-9_] — any letter, digit, or underscore.\n\n\\d is shorthand for [0-9]. \\s is shorthand for whitespace (space, tab, newline).\n\nThese shorthands are faster to type and immediately readable to anyone who knows regex. \\w+ is 'one or more word characters.'",
+        type: "match",
+        corpus: [
+          "RECORD#freq_1#1420",
+          "RECORD#amp_2#0087",
+          "RECORD#phase_3#2741",
+          "RECORD#fr eq_1#1420",
+          "RECORD#amp-2#0087",
+          "RECORD#phase.3#2741"
+        ],
+        mustMatch: [
+          "RECORD#freq_1#1420",
+          "RECORD#amp_2#0087",
+          "RECORD#phase_3#2741"
+        ],
+        mustNotMatch: [
+          "RECORD#fr eq_1#1420",
+          "RECORD#amp-2#0087",
+          "RECORD#phase.3#2741"
+        ],
+        par: 7,
+        baseXP: 100,
+        parBonusXP: 25,
+        referenceSolution: "#\\w+#",
+        hint: "\\w matches any letter, digit, or underscore — the characters a valid identifier is made of.",
+        hintCost: 10,
+        conceptNote: "\\w is shorthand for [a-zA-Z0-9_]. It excludes spaces, hyphens, dots, and other punctuation — exactly the characters that make a key malformed here.",
+        isSideChallenge: false,
+        isBoss: false
+      },
+
+      // ─── Challenge 2-4 ──────────────────────────────
+      {
+        id: "2-4",
+        title: "Contaminated Fields",
+        briefing: "Cosmic ray interference can flip bits in transmission, producing characters that have no business in a clean data record. Match any line containing such a character.",
+        scenario: "The integrity checker flagged several readings as potentially corrupted. Lines containing non-letter, non-digit, non-space characters need to be quarantined for re-request.",
+        learnMore: "A negated class [^abc] matches any single character NOT in the listed set.\n\n[^\\w ] matches any character that is neither a word character (\\w) nor a space.\n\nNegated classes invert the logic of a character class. They're useful when it's easier to describe what you don't want than what you do.",
+        type: "match",
+        corpus: [
+          "reading ALPHA 421",
+          "reading BETA 808",
+          "reading GAMMA 133",
+          "reading ALPHA@421",
+          "reading BETA#808",
+          "reading GAMMA!133"
+        ],
+        mustMatch: [
+          "reading ALPHA@421",
+          "reading BETA#808",
+          "reading GAMMA!133"
+        ],
+        mustNotMatch: [
+          "reading ALPHA 421",
+          "reading BETA 808",
+          "reading GAMMA 133"
+        ],
+        par: 8,
+        baseXP: 100,
+        parBonusXP: 50,
+        referenceSolution: "[^\\w ]",
+        hint: "A negated class [^...] matches anything NOT in the set. What characters should a clean record never contain?",
+        hintCost: 10,
+        conceptNote: "[^\\w ] matches any character that is not a word character and not a space. One such character anywhere in the line is enough to flag it as contaminated.",
+        isSideChallenge: false,
+        isBoss: false
+      },
+
+      // ─── Side Challenge 2-S ─────────────────────────
+      {
+        id: "2-S",
+        title: "Bad Packets",
+        briefing: "Signal color-maps use 6-digit hex codes — digits 0-9 and uppercase A-F only. Flag any packet containing a character outside that range. It needs to be re-transmitted.",
+        scenario: "The visual mapping system only accepts strict uppercase hex. Packets with lowercase letters or out-of-range characters will crash the renderer.",
+        type: "exclude",
+        corpus: [
+          "#A4F3C2 sector_1",
+          "#0B9E1D sector_2",
+          "#FFD700 sector_3",
+          "#G4A1B2 sector_4",
+          "#4b9e1d sector_5",
+          "#A4F3Z2 sector_6"
+        ],
+        mustMatch: [
+          "#G4A1B2 sector_4",
+          "#4b9e1d sector_5",
+          "#A4F3Z2 sector_6"
+        ],
+        mustNotMatch: [
+          "#A4F3C2 sector_1",
+          "#0B9E1D sector_2",
+          "#FFD700 sector_3"
+        ],
+        par: 9,
+        baseXP: 0,
+        parBonusXP: 200,
+        referenceSolution: "[G-Za-z]",
+        hint: "Valid hex uses 0-9 and A-F only. Any letter outside A-F range — or any lowercase letter — is invalid.",
+        hintCost: 10,
+        conceptNote: "[G-Za-z] combines two ranges: G-Z catches uppercase letters beyond F, and a-z catches any lowercase. Neither range includes the valid A-F uppercase digits.",
+        isSideChallenge: true,
+        isBoss: false
+      },
+
+      // ─── Boss Challenge 2-B ─────────────────────────
+      {
+        id: "2-B",
+        title: "The Decoder Ring",
+        briefing: "A genuine data record has a band code [LSXC], a lowercase sector name, a colon, then an uppercase hex payload. Pull only the real records from the noise.",
+        scenario: "The full signal dump contains valid bureau records, legacy admin entries, and corrupted data — all in the same stream. The decoder needs clean input. You need to extract it.",
+        type: "match",
+        corpus: [
+          "Lalpha:A4F3C2",
+          "Sbeta:0B9E1D",
+          "Xgamma:FFD700",
+          "Kdelta:A1B2C3",
+          "Lalpha:a4f3c2",
+          "SBETA:A4F3C2",
+          "Lsigma:!DEAD!"
+        ],
+        mustMatch: [
+          "Lalpha:A4F3C2",
+          "Sbeta:0B9E1D",
+          "Xgamma:FFD700"
+        ],
+        mustNotMatch: [
+          "Kdelta:A1B2C3",
+          "Lalpha:a4f3c2",
+          "SBETA:A4F3C2",
+          "Lsigma:!DEAD!"
+        ],
+        par: 17,
+        baseXP: 175,
+        parBonusXP: 75,
+        referenceSolution: "[LSXC][a-z]+:[0-9A-F]+",
+        hint: "A valid record has four distinct parts. Each part has its own character constraint.",
+        hintCost: 10,
+        conceptNote: "Combines character classes, ranges, and quantifiers: band [LSXC], sector [a-z]+, literal colon, and hex payload [0-9A-F]+. Each constraint eliminates a different class of invalid entry.",
+        isSideChallenge: false,
+        isBoss: true
+      }
+
+    ] // end challenges
+  }  // end world-2
+
 ];   // end CAMPAIGN
 
 // ────────────────────────────────────────────────────
@@ -471,41 +711,84 @@ const MAP_LAYOUT = {
       "1-S": { x: 640, y: 450, side: true },
       "1-B": { x: 790, y: 300, boss: true }
     }
+  },
+  "world-2": {
+    worldNode: { x: 970, y: 300 },
+    challenges: {
+      "2-1": { x: 1100, y: 300 },
+      "2-2": { x: 1230, y: 300 },
+      "2-3": { x: 1360, y: 300 },
+      "2-4": { x: 1490, y: 300 },
+      "2-S": { x: 1490, y: 450, side: true },
+      "2-B": { x: 1640, y: 300, boss: true }
+    }
   }
 };
 
 function getChallengeState(challengeId, progress) {
   if (progress.completedChallenges.includes(challengeId)) return "completed";
 
-  // Determine unlock logic
-  const allChallenges = CAMPAIGN.flatMap(w => w.challenges);
-  const idx = allChallenges.findIndex(c => c.id === challengeId);
-  if (idx === 0) return "available"; // first challenge always available
+  // Find which world this challenge belongs to
+  let worldObj = null, worldIdx = -1;
+  for (let i = 0; i < CAMPAIGN.length; i++) {
+    if (CAMPAIGN[i].challenges.some(c => c.id === challengeId)) {
+      worldObj = CAMPAIGN[i];
+      worldIdx = i;
+      break;
+    }
+  }
+  if (!worldObj) return "locked";
 
-  const ch = allChallenges[idx];
-  // Side challenge 1-S unlocks alongside 1-4
-  if (ch.isSideChallenge) {
-    const prevId = allChallenges[idx - 1]; // challenge before it in array
-    // 1-S unlocks when 1-3 is complete (alongside 1-4)
-    return progress.completedChallenges.includes("1-3") ? "available" : "locked";
-  }
-  // Boss unlocks when all non-side, non-boss in world are complete
+  const worldChallenges = worldObj.challenges;
+  const ch = worldChallenges.find(c => c.id === challengeId);
+
+  // Boss: all non-side, non-boss in same world must be complete
   if (ch.isBoss) {
-    const worldChallenges = CAMPAIGN[0].challenges.filter(c => !c.isBoss && !c.isSideChallenge);
-    const allDone = worldChallenges.every(c => progress.completedChallenges.includes(c.id));
-    return allDone ? "available" : "locked";
+    const main = worldChallenges.filter(c => !c.isBoss && !c.isSideChallenge);
+    return main.every(c => progress.completedChallenges.includes(c.id)) ? "available" : "locked";
   }
-  // Regular: previous non-side must be complete
-  const prevNormal = allChallenges.slice(0, idx).filter(c => !c.isSideChallenge && !c.isBoss);
-  const prevId = prevNormal[prevNormal.length - 1];
-  if (!prevId) return "available";
-  return progress.completedChallenges.includes(prevId.id) ? "available" : "locked";
+
+  // Side challenge: unlocks when the previous main challenge in same world is complete
+  if (ch.isSideChallenge) {
+    const scIdx = worldChallenges.indexOf(ch);
+    const prevMain = worldChallenges.slice(0, scIdx).filter(c => !c.isSideChallenge && !c.isBoss);
+    const unlock = prevMain[prevMain.length - 1];
+    if (!unlock) return "available";
+    return progress.completedChallenges.includes(unlock.id) ? "available" : "locked";
+  }
+
+  // First challenge of the first world: always available
+  const mainInWorld = worldChallenges.filter(c => !c.isSideChallenge && !c.isBoss);
+  if (ch === mainInWorld[0]) {
+    if (worldIdx === 0) return "available";
+    // First challenge of world 2+: requires previous world's boss
+    const prevBoss = CAMPAIGN[worldIdx - 1].challenges.find(c => c.isBoss);
+    return prevBoss && progress.completedChallenges.includes(prevBoss.id) ? "available" : "locked";
+  }
+
+  // Regular challenge: previous main challenge in same world must be complete
+  const chIdx = worldChallenges.indexOf(ch);
+  const prevMain = worldChallenges.slice(0, chIdx).filter(c => !c.isSideChallenge && !c.isBoss);
+  const prev = prevMain[prevMain.length - 1];
+  if (!prev) return "available";
+  return progress.completedChallenges.includes(prev.id) ? "available" : "locked";
 }
 
 function renderMap() {
   const progress = loadProgress();
   document.getElementById("map-xp").textContent = `XP: ${progress.xp}`;
-  document.getElementById("world-narrative-text").textContent = CAMPAIGN[0].narrative;
+
+  // Show narrative for the furthest world with available or completed challenges
+  let narrativeWorld = CAMPAIGN[0];
+  for (const w of CAMPAIGN) {
+    if (w.challenges.some(c =>
+      progress.completedChallenges.includes(c.id) ||
+      getChallengeState(c.id, progress) === "available"
+    )) {
+      narrativeWorld = w;
+    }
+  }
+  document.getElementById("world-narrative-text").textContent = narrativeWorld.narrative;
 
   const svg = document.getElementById("map-svg");
   svg.innerHTML = "";
@@ -532,139 +815,134 @@ function renderMap() {
   `;
   svg.appendChild(defs);
 
-  const world = CAMPAIGN[0];
-  const layout = MAP_LAYOUT["world-1"];
+  CAMPAIGN.forEach((world, wi) => {
+    const layout = MAP_LAYOUT[world.id];
+    if (!layout) return;
 
-  // ── Draw connector lines ──────────────────────────
-  const mainPath = ["1-1","1-2","1-3","1-4","1-B"];
-  for (let i = 0; i < mainPath.length - 1; i++) {
-    const a = layout.challenges[mainPath[i]];
-    const b = layout.challenges[mainPath[i + 1]];
-    const line = svgEl("line", {
-      x1: a.x, y1: a.y, x2: b.x, y2: b.y,
-      stroke: "#1e3a5f", "stroke-width": 2
-    });
-    svg.appendChild(line);
-  }
-  // World hub to first challenge
-  {
-    const w = layout.worldNode;
-    const c = layout.challenges["1-1"];
-    svg.appendChild(svgEl("line", { x1: w.x + 44, y1: w.y, x2: c.x - 20, y2: c.y, stroke: "#1e3a5f", "stroke-width": 2 }));
-  }
-  // Side challenge dashed connector
-  {
-    const a = layout.challenges["1-4"];
-    const b = layout.challenges["1-S"];
-    svg.appendChild(svgEl("line", {
-      x1: a.x, y1: a.y, x2: b.x, y2: b.y,
-      stroke: "#1e3a5f", "stroke-width": 2, "stroke-dasharray": "5 4"
-    }));
-  }
+    const mainChallenges = world.challenges.filter(c => !c.isSideChallenge && !c.isBoss);
+    const bossChallenge  = world.challenges.find(c => c.isBoss);
+    const sideChallenges = world.challenges.filter(c => c.isSideChallenge);
 
-  // ── World hub node ─────────────────────────────────
-  {
-    const { x, y } = layout.worldNode;
-    const g = svgEl("g", { class: "map-node-world" });
-
-    const circle = svgEl("circle", { cx: x, cy: y, r: 44, fill: "#16213e", stroke: "#0f9b8e", "stroke-width": 3 });
-    g.appendChild(circle);
-
-    const label = svgEl("text", { x, y: y - 6, "text-anchor": "middle", fill: "#0f9b8e", "font-size": 11, "font-family": "JetBrains Mono, monospace", "font-weight": 700, "letter-spacing": "0.1" });
-    label.textContent = "WORLD 1";
-    g.appendChild(label);
-
-    const sub = svgEl("text", { x, y: y + 10, "text-anchor": "middle", fill: "#7a7a9a", "font-size": 9, "font-family": "system-ui, sans-serif" });
-    sub.textContent = "Log File";
-    g.appendChild(sub);
-    const sub2 = svgEl("text", { x, y: y + 22, "text-anchor": "middle", fill: "#7a7a9a", "font-size": 9, "font-family": "system-ui, sans-serif" });
-    sub2.textContent = "Detective";
-    g.appendChild(sub2);
-
-    svg.appendChild(g);
-  }
-
-  // ── Challenge nodes ────────────────────────────────
-  world.challenges.forEach(challenge => {
-    const pos = layout.challenges[challenge.id];
-    if (!pos) return;
-    const state = getChallengeState(challenge.id, progress);
-
-    const r       = challenge.isBoss ? 32 : challenge.isSideChallenge ? 20 : 24;
-    const g       = svgEl("g", { class: `map-node node-${state}${challenge.isBoss ? " node-boss" : ""}${challenge.isSideChallenge ? " node-side" : ""}` });
-
-    // Background glow for completed boss
-    if (challenge.isBoss && state === "completed") {
-      const glow = svgEl("circle", { cx: pos.x, cy: pos.y, r: r + 12, fill: "none", stroke: "rgba(245,166,35,0.2)", "stroke-width": 8 });
-      g.appendChild(glow);
-    }
-    if (state === "completed" && !challenge.isBoss) {
-      const glow = svgEl("circle", { cx: pos.x, cy: pos.y, r: r + 8, fill: "none", stroke: "rgba(15,155,142,0.15)", "stroke-width": 6 });
-      g.appendChild(glow);
+    // ── Main path connectors (including to boss) ──────
+    const fullPath = [...mainChallenges.map(c => c.id), ...(bossChallenge ? [bossChallenge.id] : [])];
+    for (let i = 0; i < fullPath.length - 1; i++) {
+      const a = layout.challenges[fullPath[i]];
+      const b = layout.challenges[fullPath[i + 1]];
+      if (a && b) svg.appendChild(svgEl("line", { x1: a.x, y1: a.y, x2: b.x, y2: b.y, stroke: "#1e3a5f", "stroke-width": 2 }));
     }
 
-    // Main circle
-    const strokeColor = challenge.isBoss ? "#f5a623" : state === "locked" ? "#3a3a5a" : "#0f9b8e";
-    const fillColor   = state === "completed"
-      ? (challenge.isBoss ? "#f5a623" : "#0f9b8e")
-      : state === "locked" ? "#1a1a2e" : "transparent";
-
-    const circle = svgEl("circle", {
-      cx: pos.x, cy: pos.y, r,
-      fill: fillColor,
-      stroke: strokeColor,
-      "stroke-width": challenge.isBoss ? 3 : 2,
-      ...(challenge.isSideChallenge ? { "stroke-dasharray": "4 3" } : {}),
-      ...(state === "completed" && !challenge.isBoss ? { filter: "url(#glow-teal)" } : {}),
-      ...(challenge.isBoss && state !== "locked" ? { filter: "url(#glow-gold)" } : {})
-    });
-    g.appendChild(circle);
-
-    // ID label inside node
-    const labelColor = state === "completed"
-      ? "#fff"
-      : state === "locked"
-      ? "#3a3a5a"
-      : challenge.isBoss ? "#f5a623" : "#0f9b8e";
-
-    const idLabel = svgEl("text", {
-      x: pos.x, y: pos.y + 4,
-      "text-anchor": "middle",
-      fill: labelColor,
-      "font-size": challenge.isBoss ? 11 : challenge.isSideChallenge ? 9 : 10,
-      "font-family": "JetBrains Mono, monospace",
-      "font-weight": 700
-    });
-    idLabel.textContent = challenge.id;
-    g.appendChild(idLabel);
-
-    // Title below node
-    const titleLabel = svgEl("text", {
-      x: pos.x,
-      y: pos.y + r + 14,
-      "text-anchor": "middle",
-      fill: state === "locked" ? "#3a3a5a" : "#7a7a9a",
-      "font-size": 9,
-      "font-family": "system-ui, sans-serif"
-    });
-    titleLabel.textContent = challenge.title;
-    g.appendChild(titleLabel);
-
-    // Padlock icon if locked
-    if (state === "locked") {
-      const lock = svgEl("text", { x: pos.x, y: pos.y + 5, "text-anchor": "middle", fill: "#3a3a5a", "font-size": 12 });
-      lock.textContent = "🔒";
-      g.appendChild(lock);
+    // ── World hub to first challenge ──────────────────
+    if (mainChallenges.length > 0) {
+      const w  = layout.worldNode;
+      const c  = layout.challenges[mainChallenges[0].id];
+      if (c) svg.appendChild(svgEl("line", { x1: w.x + 44, y1: w.y, x2: c.x - 20, y2: c.y, stroke: "#1e3a5f", "stroke-width": 2 }));
     }
 
-    // Clickable only if not locked
-    if (state !== "locked") {
-      g.style.cursor = "pointer";
-      g.addEventListener("click", () => loadChallenge(challenge.id));
+    // ── Side challenge dashed connectors ─────────────
+    sideChallenges.forEach(sc => {
+      const scIdx   = world.challenges.indexOf(sc);
+      const prevMain = world.challenges.slice(0, scIdx).filter(c => !c.isSideChallenge && !c.isBoss);
+      const parent  = prevMain[prevMain.length - 1];
+      if (parent) {
+        const a = layout.challenges[parent.id];
+        const b = layout.challenges[sc.id];
+        if (a && b) svg.appendChild(svgEl("line", { x1: a.x, y1: a.y, x2: b.x, y2: b.y, stroke: "#1e3a5f", "stroke-width": 2, "stroke-dasharray": "5 4" }));
+      }
+    });
+
+    // ── Cross-world connector to next world ──────────
+    if (wi < CAMPAIGN.length - 1) {
+      const nextLayout = MAP_LAYOUT[CAMPAIGN[wi + 1].id];
+      if (bossChallenge && nextLayout) {
+        const bossPos = layout.challenges[bossChallenge.id];
+        const nextHub = nextLayout.worldNode;
+        svg.appendChild(svgEl("line", { x1: bossPos.x, y1: bossPos.y, x2: nextHub.x - 44, y2: nextHub.y, stroke: "#1e3a5f", "stroke-width": 2 }));
+      }
     }
 
-    svg.appendChild(g);
-  });
+    // ── World hub node ────────────────────────────────
+    {
+      const { x, y } = layout.worldNode;
+      const g = svgEl("g", { class: "map-node-world" });
+
+      const circle = svgEl("circle", { cx: x, cy: y, r: 44, fill: "#16213e", stroke: "#0f9b8e", "stroke-width": 3 });
+      g.appendChild(circle);
+
+      const wNum = wi + 1;
+      const label = svgEl("text", { x, y: y - 6, "text-anchor": "middle", fill: "#0f9b8e", "font-size": 11, "font-family": "JetBrains Mono, monospace", "font-weight": 700 });
+      label.textContent = `WORLD ${wNum}`;
+      g.appendChild(label);
+
+      // Split subtitle on space into two lines
+      const titleWords = world.title.split(" ");
+      const mid = Math.ceil(titleWords.length / 2);
+      const line1 = titleWords.slice(0, mid).join(" ");
+      const line2 = titleWords.slice(mid).join(" ");
+      const sub1 = svgEl("text", { x, y: y + 10, "text-anchor": "middle", fill: "#7a7a9a", "font-size": 9, "font-family": "system-ui, sans-serif" });
+      sub1.textContent = line1;
+      g.appendChild(sub1);
+      if (line2) {
+        const sub2 = svgEl("text", { x, y: y + 22, "text-anchor": "middle", fill: "#7a7a9a", "font-size": 9, "font-family": "system-ui, sans-serif" });
+        sub2.textContent = line2;
+        g.appendChild(sub2);
+      }
+
+      svg.appendChild(g);
+    }
+
+    // ── Challenge nodes ───────────────────────────────
+    world.challenges.forEach(challenge => {
+      const pos = layout.challenges[challenge.id];
+      if (!pos) return;
+      const state = getChallengeState(challenge.id, progress);
+
+      const r = challenge.isBoss ? 32 : challenge.isSideChallenge ? 20 : 24;
+      const g = svgEl("g", { class: `map-node node-${state}${challenge.isBoss ? " node-boss" : ""}${challenge.isSideChallenge ? " node-side" : ""}` });
+
+      if (challenge.isBoss && state === "completed") {
+        g.appendChild(svgEl("circle", { cx: pos.x, cy: pos.y, r: r + 12, fill: "none", stroke: "rgba(245,166,35,0.2)", "stroke-width": 8 }));
+      }
+      if (state === "completed" && !challenge.isBoss) {
+        g.appendChild(svgEl("circle", { cx: pos.x, cy: pos.y, r: r + 8, fill: "none", stroke: "rgba(15,155,142,0.15)", "stroke-width": 6 }));
+      }
+
+      const strokeColor = challenge.isBoss ? "#f5a623" : state === "locked" ? "#3a3a5a" : "#0f9b8e";
+      const fillColor   = state === "completed"
+        ? (challenge.isBoss ? "#f5a623" : "#0f9b8e")
+        : state === "locked" ? "#1a1a2e" : "transparent";
+
+      g.appendChild(svgEl("circle", {
+        cx: pos.x, cy: pos.y, r,
+        fill: fillColor, stroke: strokeColor,
+        "stroke-width": challenge.isBoss ? 3 : 2,
+        ...(challenge.isSideChallenge ? { "stroke-dasharray": "4 3" } : {}),
+        ...(state === "completed" && !challenge.isBoss ? { filter: "url(#glow-teal)" } : {}),
+        ...(challenge.isBoss && state !== "locked" ? { filter: "url(#glow-gold)" } : {})
+      }));
+
+      const labelColor = state === "completed" ? "#fff" : state === "locked" ? "#3a3a5a" : challenge.isBoss ? "#f5a623" : "#0f9b8e";
+      const idLabel = svgEl("text", { x: pos.x, y: pos.y + 4, "text-anchor": "middle", fill: labelColor, "font-size": challenge.isBoss ? 11 : challenge.isSideChallenge ? 9 : 10, "font-family": "JetBrains Mono, monospace", "font-weight": 700 });
+      idLabel.textContent = challenge.id;
+      g.appendChild(idLabel);
+
+      const titleLabel = svgEl("text", { x: pos.x, y: pos.y + r + 14, "text-anchor": "middle", fill: state === "locked" ? "#3a3a5a" : "#7a7a9a", "font-size": 9, "font-family": "system-ui, sans-serif" });
+      titleLabel.textContent = challenge.title;
+      g.appendChild(titleLabel);
+
+      if (state === "locked") {
+        const lock = svgEl("text", { x: pos.x, y: pos.y + 5, "text-anchor": "middle", fill: "#3a3a5a", "font-size": 12 });
+        lock.textContent = "🔒";
+        g.appendChild(lock);
+      }
+
+      if (state !== "locked") {
+        g.style.cursor = "pointer";
+        g.addEventListener("click", () => loadChallenge(challenge.id));
+      }
+
+      svg.appendChild(g);
+    });
+  }); // end CAMPAIGN.forEach
 }
 
 // ────────────────────────────────────────────────────
