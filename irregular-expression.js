@@ -31,7 +31,8 @@ const CAMPAIGN = [
           "[INFO] Request received from 192.168.1.1",
           "[ERROR] Connection timeout",
           "[DEBUG] Cache miss for key user_4421",
-          "[INFO] Shutdown complete"
+          "[INFO] Shutdown complete",
+          "[INFO] Last ERROR cleared at 07:58"
         ],
         mustMatch: [
           "[ERROR] Disk space critical",
@@ -41,9 +42,10 @@ const CAMPAIGN = [
           "[INFO] Server started on port 8080",
           "[INFO] Request received from 192.168.1.1",
           "[DEBUG] Cache miss for key user_4421",
-          "[INFO] Shutdown complete"
+          "[INFO] Shutdown complete",
+          "[INFO] Last ERROR cleared at 07:58"
         ],
-        par: 10,
+        par: 3,
         baseXP: 50,
         parBonusXP: 25,
         referenceSolution: "\\[ERROR\\].*",
@@ -67,7 +69,8 @@ const CAMPAIGN = [
           "2024/03/15 09:11:03 LOGOUT user_99",
           "2024.03.15 10:00:00 LOGIN success",
           "2024 03 15 11:45:22 TIMEOUT",
-          "2024-03-15 12:00:01 LOGIN success"
+          "2024-03-15 12:00:01 LOGIN success",
+          "2024-03-14 22:01:55 TELESCOPE park sequence"
         ],
         // Validation: regex must match the timestamp portion (first 19 chars)
         mustMatch: [
@@ -77,8 +80,10 @@ const CAMPAIGN = [
           "2024 03 15 11:45:22",
           "2024-03-15 12:00:01"
         ],
-        mustNotMatch: [],
-        par: 18,
+        mustNotMatch: [
+          "2024-03-14 22:01:55"
+        ],
+        par: 10,
         baseXP: 75,
         parBonusXP: 25,
         referenceSolution: "2024.03.15.\\d\\d:\\d\\d:\\d\\d",
@@ -104,7 +109,8 @@ const CAMPAIGN = [
           "admin LOGIN success",
           "user_ LOGIN failed",
           "system REBOOT initiated",
-          "user_0 LOGIN success"
+          "user_0 LOGIN success",
+          "session timeout after 30 seconds"
         ],
         mustMatch: [
           "user_9 LOGIN failed",
@@ -115,7 +121,8 @@ const CAMPAIGN = [
         mustNotMatch: [
           "admin LOGIN success",
           "user_ LOGIN failed",
-          "system REBOOT initiated"
+          "system REBOOT initiated",
+          "session timeout after 30 seconds"
         ],
         par: 7,
         baseXP: 75,
@@ -142,7 +149,8 @@ const CAMPAIGN = [
           "POST /api/login 401",
           "POST /api/login [LOW] 200",
           "DELETE /api/session 200",
-          "DELETE /api/session [MED] 500"
+          "DELETE /api/session [MED] 500",
+          "[ERROR] /api/users endpoint unreachable"
         ],
         mustMatch: [
           "GET /api/users 200",
@@ -152,8 +160,10 @@ const CAMPAIGN = [
           "DELETE /api/session 200",
           "DELETE /api/session [MED] 500"
         ],
-        mustNotMatch: [],
-        par: 28,
+        mustNotMatch: [
+          "[ERROR] /api/users endpoint unreachable"
+        ],
+        par: 10,
         baseXP: 100,
         parBonusXP: 50,
         referenceSolution: "[A-Z]+ /api/\\w+ (\\[.*\\] )?\\d+",
@@ -189,7 +199,7 @@ const CAMPAIGN = [
           "Version 2.0.1 deployed",
           "User 10 logged out"
         ],
-        par: 20,
+        par: 16,
         baseXP: 0,
         parBonusXP: 150,
         referenceSolution: "\\d+\\.\\d+\\.\\d+\\.\\d+",
@@ -214,7 +224,8 @@ const CAMPAIGN = [
           "2024-01-20 03:01:12 admin LOGIN success",
           "2024-01-20 03:14:09 user_7 EXFIL 4.2MB",
           "2024-01-20 04:00:01 system REBOOT",
-          "2024-01-20 03:59:59 user_7 LOGOUT"
+          "2024-01-20 03:59:59 user_7 LOGOUT",
+          "2024-01-20 14:03:22 system HEALTH check passed"
         ],
         mustMatch: [
           "2024-01-20 03:00:02 user_7 FILE_ACCESS /etc/passwd",
@@ -225,9 +236,10 @@ const CAMPAIGN = [
         ],
         mustNotMatch: [
           "2024-01-20 02:59:58 user_7 LOGIN success",
-          "2024-01-20 04:00:01 system REBOOT"
+          "2024-01-20 04:00:01 system REBOOT",
+          "2024-01-20 14:03:22 system HEALTH check passed"
         ],
-        par: 22,
+        par: 4,
         baseXP: 150,
         parBonusXP: 50,
         referenceSolution: "2024-01-20 03:\\d\\d:\\d\\d.*",
