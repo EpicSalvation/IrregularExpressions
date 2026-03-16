@@ -491,6 +491,476 @@ const CAMPAIGN = [
     ] // end challenges
   }  // end world-2
 
+  // ═══════════════════════════════════════════════════════════
+  // WORLD 3 — The Validation Department
+  // ═══════════════════════════════════════════════════════════
+  {
+    id: "world-3",
+    title: "The Validation Department",
+    subtitle: "Exact specifications. No exceptions.",
+    narrative: "The anomaly data is being analyzed. You've been transferred to the Validation Department. Every transmission must conform to exact format specifications before it can be processed.",
+    conceptsIntroduced: ["start anchor ^", "end anchor $", "exact count {n}", "range count {n,m}", "zero-or-more *"],
+    challenges: [
+
+      // ─── Challenge 3-1 ───────────────────────────────────────────
+      {
+        id: "3-1",
+        title: "Header Check",
+        briefing: "Genuine status reports start with STATUS:. Malformed entries have it buried mid-line. Match only the real ones.",
+        type: "match",
+        corpus: [
+          "STATUS: sector alpha nominal",
+          "STATUS: sector beta elevated",
+          "STATUS: sector epsilon confirmed",
+          "RELAY STATUS: sector gamma pending",
+          "WARNING: STATUS elevated in delta",
+          "STATIC: interference detected"
+        ],
+        mustMatch: [
+          "STATUS: sector alpha nominal",
+          "STATUS: sector beta elevated",
+          "STATUS: sector epsilon confirmed"
+        ],
+        mustNotMatch: [
+          "RELAY STATUS: sector gamma pending",
+          "WARNING: STATUS elevated in delta",
+          "STATIC: interference detected"
+        ],
+        par: 7,
+        baseXP: 75,
+        parBonusXP: 35,
+        referenceSolution: "^STATUS",
+        learnMore: "The ^ anchor tells the engine to match only at the very start of the string. Without it, STATUS would be found anywhere in the line — including mid-line malformed entries. Adding ^ makes position part of the pattern.",
+        hint: "You need to pin the match to a specific position in the line. What anchor means 'at the start'?",
+        hintCost: 10,
+        conceptNote: "^ anchors the match to the start of the string. Without it, STATUS matches lines 4 and 5 as well — position doesn't matter to an unanchored pattern. With ^STATUS, only lines that begin with STATUS qualify.",
+        isSideChallenge: false,
+        isBoss: false
+      },
+
+      // ─── Challenge 3-2 ───────────────────────────────────────────
+      {
+        id: "3-2",
+        title: "Transmission End",
+        briefing: "Valid confirmations end with RECEIVED. Some lines have RECEIVED buried mid-line instead. Match only the genuine ones.",
+        type: "match",
+        corpus: [
+          "PROBE_A: transmission RECEIVED",
+          "PROBE_B: packet RECEIVED",
+          "PROBE_E: status RECEIVED",
+          "relay RECEIVED: signal_c pending",
+          "RECEIVED confirmation: PROBE_D",
+          "PROBE_F: RECEIVED and processed"
+        ],
+        mustMatch: [
+          "PROBE_A: transmission RECEIVED",
+          "PROBE_B: packet RECEIVED",
+          "PROBE_E: status RECEIVED"
+        ],
+        mustNotMatch: [
+          "relay RECEIVED: signal_c pending",
+          "RECEIVED confirmation: PROBE_D",
+          "PROBE_F: RECEIVED and processed"
+        ],
+        par: 9,
+        baseXP: 75,
+        parBonusXP: 35,
+        referenceSolution: "RECEIVED$",
+        learnMore: "The $ anchor tells the engine to match only at the very end of the string. RECEIVED$ only matches when RECEIVED is the last thing on the line. Without $, the pattern matches all six lines.",
+        hint: "You need to pin the match to a specific position. What anchor means 'at the end'?",
+        hintCost: 10,
+        conceptNote: "$ anchors the match to the end of the string. Without it, RECEIVED matches every line in the corpus — it appears in all six. With RECEIVED$, only lines where RECEIVED is the final word qualify.",
+        isSideChallenge: false,
+        isBoss: false
+      },
+
+      // ─── Challenge 3-3 ───────────────────────────────────────────
+      {
+        id: "3-3",
+        title: "Six-Digit Codes",
+        briefing: "Station identifiers must be exactly six digits. Match the valid ones and ignore the malformed entries.",
+        type: "match",
+        corpus: [
+          "STA-104289: nominal",
+          "STA-987134: elevated",
+          "STA-440017: confirmed",
+          "STA-20345: format error",
+          "STA-0791: format error",
+          "STA-82: format error"
+        ],
+        mustMatch: [
+          "STA-104289: nominal",
+          "STA-987134: elevated",
+          "STA-440017: confirmed"
+        ],
+        mustNotMatch: [
+          "STA-20345: format error",
+          "STA-0791: format error",
+          "STA-82: format error"
+        ],
+        par: 5,
+        baseXP: 75,
+        parBonusXP: 35,
+        referenceSolution: "\\d{6}",
+        learnMore: "{n} matches exactly n repetitions of the preceding element. \\d{6} is equivalent to \\d\\d\\d\\d\\d\\d but far more readable — and the advantage grows with larger counts. The engine will not match if the digit run is shorter than n.",
+        hint: "You need exactly six consecutive digits. Repeating \\d six times works — but there's a more concise notation.",
+        hintCost: 10,
+        conceptNote: "\\d{6} matches exactly six consecutive digits — no more, no fewer. The invalid entries have 2–5 digits, so \\d{6} finds nothing in them. Compare to writing \\d\\d\\d\\d\\d\\d: {n} notation is shorter and scales cleanly.",
+        isSideChallenge: false,
+        isBoss: false
+      },
+
+      // ─── Challenge 3-4 ───────────────────────────────────────────
+      {
+        id: "3-4",
+        title: "Variable-Length Codes",
+        briefing: "Sector codes must be 2 to 4 uppercase letters — no more, no fewer. The codes always appear at the end of the line after a colon. Match the valid entries.",
+        type: "match",
+        corpus: [
+          "sector code:AB",
+          "sector code:XYZ",
+          "sector code:LMNO",
+          "sector code:Q",
+          "sector code:PQRST",
+          "sector code:ABCDEF"
+        ],
+        mustMatch: [
+          "sector code:AB",
+          "sector code:XYZ",
+          "sector code:LMNO"
+        ],
+        mustNotMatch: [
+          "sector code:Q",
+          "sector code:PQRST",
+          "sector code:ABCDEF"
+        ],
+        par: 10,
+        baseXP: 75,
+        parBonusXP: 35,
+        referenceSolution: ":[A-Z]{2,4}$",
+        learnMore: "{n,m} matches between n and m repetitions inclusive. Combine it with $ to anchor to the end of the line — otherwise a 5-letter code would partially match (the engine would find a valid 4-letter substring within it).",
+        hint: "The code is always the last thing on the line. You need a range quantifier and an end anchor to avoid partially matching longer codes.",
+        hintCost: 10,
+        conceptNote: ":[A-Z]{2,4}$ combines three ideas: the colon anchors the match context, {2,4} enforces the length range, and $ prevents partial matches against longer codes. Without $, PQRST would match as PQRS.",
+        isSideChallenge: false,
+        isBoss: false
+      },
+
+      // ─── Side Challenge 3-S ─────────────────────────
+      {
+        id: "3-S",
+        title: "Bad Packets",
+        briefing: "Signal color-maps use 6-digit hex codes — digits 0-9 and uppercase A-F only. Flag any packet containing a character outside that valid range.",
+        type: "exclude",
+        corpus: [
+          "#A4F3C2 SECTOR_1",
+          "#0B9E1D SECTOR_2",
+          "#FFD700 SECTOR_3",
+          "#G4A1B2 SECTOR_4",
+          "#4b9e1d SECTOR_5",
+          "#A4F3Z2 SECTOR_6"
+        ],
+        mustMatch: [
+          "#G4A1B2 SECTOR_4",
+          "#4b9e1d SECTOR_5",
+          "#A4F3Z2 SECTOR_6"
+        ],
+        mustNotMatch: [
+          "#A4F3C2 SECTOR_1",
+          "#0B9E1D SECTOR_2",
+          "#FFD700 SECTOR_3"
+        ],
+        par: 12,
+        baseXP: 0,
+        parBonusXP: 200,
+        referenceSolution: "#\\w*[G-Za-z]",
+        hint: "Start from the # to avoid matching the SECTOR labels. Use * to skip over any valid hex characters, then require a character that falls outside the valid range.",
+        hintCost: 10,
+        conceptNote: "#\\w*[G-Za-z] anchors to the hex block via #, uses \\w* to skip any leading valid characters, then requires an invalid one. The SECTOR labels are never reached because the pattern always starts from #.",
+        isSideChallenge: true,
+        isBoss: false
+      },
+
+      // ─── Boss Challenge 3-B ─────────────────────────
+      {
+        id: "3-B",
+        title: "Full Compliance",
+        briefing: "Transmission records must follow a strict format: exactly 3 digits, a dash, exactly 2 uppercase letters, a dash, exactly 6 digits. The full line — nothing more, nothing less.",
+        type: "match",
+        corpus: [
+          "042-XY-198734",
+          "771-AB-003847",
+          "553-QR-441290",
+          "42-XY-198734",
+          "042-XYZ-198734",
+          "042-XY-1987340",
+          "042-12-198734",
+          "042-xy-198734"
+        ],
+        mustMatch: [
+          "042-XY-198734",
+          "771-AB-003847",
+          "553-QR-441290"
+        ],
+        mustNotMatch: [
+          "42-XY-198734",
+          "042-XYZ-198734",
+          "042-XY-1987340",
+          "042-12-198734",
+          "042-xy-198734"
+        ],
+        par: 22,
+        baseXP: 175,
+        parBonusXP: 75,
+        referenceSolution: "^\\d{3}-[A-Z]{2}-\\d{6}$",
+        hint: "You need to validate the entire line from start to finish — no partial matches. Each field has a specific type and exact length.",
+        hintCost: 10,
+        conceptNote: "^\\d{3}-[A-Z]{2}-\\d{6}$ brings together every World 3 concept: ^ and $ ensure the full line matches, \\d{3} and \\d{6} enforce exact digit counts, and [A-Z]{2} requires exactly two uppercase letters. Any deviation in length or character type fails.",
+        isSideChallenge: false,
+        isBoss: true
+      }
+
+    ] // end challenges
+  },  // end world-3
+
+  // ═══════════════════════════════════════════════════════════
+  // WORLD 4 — The Pattern Recognition Division
+  // ═══════════════════════════════════════════════════════════
+  {
+    id: "world-4",
+    title: "Pattern Recognition Division",
+    subtitle: "Multiple signals. One pattern.",
+    narrative: "The anomaly is broadcasting on multiple channels simultaneously. The Pattern Recognition Division is tasked with classifying and routing each signal type. A single pattern must handle many variants.",
+    conceptsIntroduced: ["alternation |", "groups ()", "groups with quantifiers", "groups with alternation"],
+    challenges: [
+
+      // ─── Challenge 4-1 ───────────────────────────────────────────
+      {
+        id: "4-1",
+        title: "Either/Or",
+        briefing: "Only ALPHA and BETA probe transmissions are operational. GAMMA, DELTA, and EPSILON are background noise. Capture the live signals.",
+        type: "match",
+        corpus: [
+          "PROBE-7 ALPHA: active",
+          "PROBE-2 BETA: active",
+          "PROBE-9 ALPHA: active",
+          "PROBE-5 GAMMA: active",
+          "PROBE-1 DELTA: active",
+          "PROBE-3 EPSILON: active"
+        ],
+        mustMatch: [
+          "PROBE-7 ALPHA: active",
+          "PROBE-2 BETA: active",
+          "PROBE-9 ALPHA: active"
+        ],
+        mustNotMatch: [
+          "PROBE-5 GAMMA: active",
+          "PROBE-1 DELTA: active",
+          "PROBE-3 EPSILON: active"
+        ],
+        par: 9,
+        baseXP: 75,
+        parBonusXP: 35,
+        referenceSolution: "ALPHA|BETA",
+        learnMore: "The | operator means OR — the engine tries the left alternative first, and if it fails, tries the right. ALPHA|BETA matches any string containing either word. It's the simplest way to express a choice between two patterns.",
+        hint: "You need to match one of two possible words. There's an operator that means 'this or that'.",
+        hintCost: 10,
+        conceptNote: "ALPHA|BETA matches lines containing either ALPHA or BETA. The pipe | is the alternation operator — the regex engine tests each alternative in order. GAMMA, DELTA, and EPSILON match neither, so they're correctly excluded.",
+        isSideChallenge: false,
+        isBoss: false
+      },
+
+      // ─── Challenge 4-2 ───────────────────────────────────────────
+      {
+        id: "4-2",
+        title: "Shared Structure",
+        briefing: "NOMINAL and ELEVATED status reports are valid. But some lines contain those words in a different context — a noise label or interference flag. Match only the genuine status reports.",
+        type: "match",
+        corpus: [
+          "NOMINAL STATUS — sector alpha",
+          "ELEVATED STATUS — sector beta",
+          "NOMINAL STATUS — sector epsilon",
+          "NOMINAL INTERFERENCE detected",
+          "ELEVATED NOISE detected",
+          "CRITICAL STATUS — sector gamma"
+        ],
+        mustMatch: [
+          "NOMINAL STATUS — sector alpha",
+          "ELEVATED STATUS — sector beta",
+          "NOMINAL STATUS — sector epsilon"
+        ],
+        mustNotMatch: [
+          "NOMINAL INTERFERENCE detected",
+          "ELEVATED NOISE detected",
+          "CRITICAL STATUS — sector gamma"
+        ],
+        par: 24,
+        baseXP: 75,
+        parBonusXP: 35,
+        referenceSolution: "(NOMINAL|ELEVATED) STATUS",
+        learnMore: "Parentheses () create a group. Here they contain the alternation NOMINAL|ELEVATED, so the | only applies inside the group. The surrounding pattern — the space and STATUS — applies to whichever alternative matched. Without grouping, the | would split the entire pattern in two.",
+        hint: "NOMINAL and ELEVATED both appear in mustNotMatch lines, so you can't match just those words alone. You need to match them only when followed by STATUS. Groups let you apply alternation to just part of a pattern.",
+        hintCost: 10,
+        conceptNote: "(NOMINAL|ELEVATED) STATUS uses a group to scope the alternation. Without parentheses, NOMINAL|ELEVATED STATUS would mean 'NOMINAL' or 'ELEVATED STATUS' — the | splits the whole pattern. The group confines the choice, then STATUS follows either branch.",
+        isSideChallenge: false,
+        isBoss: false
+      },
+
+      // ─── Challenge 4-3 ───────────────────────────────────────────
+      {
+        id: "4-3",
+        title: "Repeating Segments",
+        briefing: "Valid record IDs consist of exactly four two-digit segments separated by dashes: NN-NN-NN-NN. Match the valid IDs and reject the malformed ones.",
+        type: "match",
+        corpus: [
+          "ID:14-03-29-88 valid",
+          "ID:07-11-58-44 valid",
+          "ID:99-00-12-37 valid",
+          "ID:14-03-29 invalid",
+          "ID:14-03-29-88-12 invalid",
+          "ID:14-3-29-88 invalid"
+        ],
+        mustMatch: [
+          "ID:14-03-29-88 valid",
+          "ID:07-11-58-44 valid",
+          "ID:99-00-12-37 valid"
+        ],
+        mustNotMatch: [
+          "ID:14-03-29 invalid",
+          "ID:14-03-29-88-12 invalid",
+          "ID:14-3-29-88 invalid"
+        ],
+        par: 21,
+        baseXP: 75,
+        parBonusXP: 35,
+        referenceSolution: "^ID:(\\d{2}-){3}\\d{2} ",
+        learnMore: "A group followed by a quantifier repeats the entire group. (\\d{2}-){3} means 'two digits and a dash, exactly three times' — equivalent to \\d{2}-\\d{2}-\\d{2}- but significantly shorter for repeated structures. The space after the final \\d{2} prevents matching the 5-segment invalid entry.",
+        hint: "Three of the four segments share the same pattern: two digits followed by a dash. A group with an exact count can express that repetition concisely.",
+        hintCost: 10,
+        conceptNote: "(\\d{2}-){3} repeats the group '\\d{2}-' exactly three times. Combined with a trailing \\d{2} for the final segment, this is far more concise than writing \\d{2}-\\d{2}-\\d{2}-\\d{2}. The space anchor prevents the 5-segment entry from matching by requiring a space after the fourth segment.",
+        isSideChallenge: false,
+        isBoss: false
+      },
+
+      // ─── Challenge 4-4 ───────────────────────────────────────────
+      {
+        id: "4-4",
+        title: "Dual Format",
+        briefing: "Signal logs record two types of events: WARN entries with a 3-digit code, and INFO entries with a 5-digit code. Both end with :LOG. Match valid entries of either type.",
+        type: "match",
+        corpus: [
+          "WARN-042:LOG",
+          "WARN-881:LOG",
+          "INFO-10291:LOG",
+          "INFO-00774:LOG",
+          "WARN-10291:LOG",
+          "INFO-042:LOG",
+          "WARN-042:ERR",
+          "DEBUG-042:LOG"
+        ],
+        mustMatch: [
+          "WARN-042:LOG",
+          "WARN-881:LOG",
+          "INFO-10291:LOG",
+          "INFO-00774:LOG"
+        ],
+        mustNotMatch: [
+          "WARN-10291:LOG",
+          "INFO-042:LOG",
+          "WARN-042:ERR",
+          "DEBUG-042:LOG"
+        ],
+        par: 28,
+        baseXP: 100,
+        parBonusXP: 50,
+        referenceSolution: "^(WARN-\\d{3}|INFO-\\d{5}):LOG$",
+        learnMore: "Groups and alternation compose naturally. ^(WARN-\\d{3}|INFO-\\d{5}):LOG$ uses a group to contain two structurally different alternatives, each with its own quantifier. The shared :LOG$ suffix lives outside the group and applies to whichever branch matched.",
+        hint: "The two valid formats share a suffix (:LOG) but have different prefixes and different digit counts. A group can hold both alternatives while the shared parts sit outside.",
+        hintCost: 10,
+        conceptNote: "^(WARN-\\d{3}|INFO-\\d{5}):LOG$ puts the two format variants inside a group, with :LOG$ outside applying to both. The alternation inside the group handles the structural difference between WARN (3 digits) and INFO (5 digits). Anchors ensure the full line matches.",
+        isSideChallenge: false,
+        isBoss: false
+      },
+
+      // ─── Side Challenge 4-S ─────────────────────────
+      {
+        id: "4-S",
+        title: "Handshake Variants",
+        briefing: "Successful handshakes use one of two formats: ALPHA probes use a 3-digit code, BETA relays use a 4-digit code. Both are wrapped in HS-...-OK. Match valid handshakes of either type.",
+        type: "match",
+        corpus: [
+          "HS-ALPHA-142-OK",
+          "HS-BETA-9834-OK",
+          "HS-ALPHA-007-OK",
+          "HS-BETA-1100-OK",
+          "HS-GAMMA-142-OK",
+          "HS-ALPHA-9834-OK",
+          "HS-BETA-142-OK"
+        ],
+        mustMatch: [
+          "HS-ALPHA-142-OK",
+          "HS-BETA-9834-OK",
+          "HS-ALPHA-007-OK",
+          "HS-BETA-1100-OK"
+        ],
+        mustNotMatch: [
+          "HS-GAMMA-142-OK",
+          "HS-ALPHA-9834-OK",
+          "HS-BETA-142-OK"
+        ],
+        par: 28,
+        baseXP: 0,
+        parBonusXP: 200,
+        referenceSolution: "HS-(ALPHA-\\d{3}|BETA-\\d{4})-OK",
+        hint: "The two variants have different internal structures — ALPHA uses 3 digits, BETA uses 4. A group containing alternation can handle both while the shared HS-...-OK wrapping sits outside.",
+        hintCost: 10,
+        conceptNote: "HS-(ALPHA-\\d{3}|BETA-\\d{4})-OK wraps two structurally different alternatives in a single group. The shared prefix HS- and suffix -OK are factored out. Without the group, you'd need to write the full pattern twice: HS-ALPHA-\\d{3}-OK|HS-BETA-\\d{4}-OK.",
+        isSideChallenge: true,
+        isBoss: false
+      },
+
+      // ─── Boss Challenge 4-B ─────────────────────────
+      {
+        id: "4-B",
+        title: "Signal Matrix",
+        briefing: "The routing system accepts two record formats: PRB type uses 3-digit codes, RLY type uses 4-digit codes. Both must end with :OK. Validate complete records of either type.",
+        type: "match",
+        corpus: [
+          "PRB:042:OK",
+          "PRB:781:OK",
+          "RLY:9834:OK",
+          "RLY:1102:OK",
+          "PRB:9834:OK",
+          "RLY:042:OK",
+          "PRB:042:FAIL",
+          "XMT:042:OK"
+        ],
+        mustMatch: [
+          "PRB:042:OK",
+          "PRB:781:OK",
+          "RLY:9834:OK",
+          "RLY:1102:OK"
+        ],
+        mustNotMatch: [
+          "PRB:9834:OK",
+          "RLY:042:OK",
+          "PRB:042:FAIL",
+          "XMT:042:OK"
+        ],
+        par: 26,
+        baseXP: 175,
+        parBonusXP: 75,
+        referenceSolution: "^(PRB:\\d{3}|RLY:\\d{4}):OK$",
+        hint: "Two formats, one pattern. Each format has a different type code and a different digit count. The :OK ending is shared. Anchors ensure nothing extra sneaks through.",
+        hintCost: 10,
+        conceptNote: "^(PRB:\\d{3}|RLY:\\d{4}):OK$ synthesises all four worlds: ^ and $ from World 3, {3} and {4} exact counts from World 3, and | alternation with () grouping from World 4. The group holds the two format variants; the shared :OK lives outside, anchored to the end.",
+        isSideChallenge: false,
+        isBoss: true
+      }
+
+    ] // end challenges
+  }  // end world-4
+
 ];   // end CAMPAIGN
 
 // ────────────────────────────────────────────────────
@@ -720,6 +1190,28 @@ const MAP_LAYOUT = {
       "2-4": { x: 1490, y: 300 },
       "2-S": { x: 1490, y: 450, side: true },
       "2-B": { x: 1640, y: 300, boss: true }
+    }
+  },
+  "world-3": {
+    worldNode: { x: 1820, y: 300 },
+    challenges: {
+      "3-1": { x: 1950, y: 300 },
+      "3-2": { x: 2080, y: 300 },
+      "3-3": { x: 2210, y: 300 },
+      "3-4": { x: 2340, y: 300 },
+      "3-S": { x: 2340, y: 450, side: true },
+      "3-B": { x: 2490, y: 300, boss: true }
+    }
+  },
+  "world-4": {
+    worldNode: { x: 2670, y: 300 },
+    challenges: {
+      "4-1": { x: 2800, y: 300 },
+      "4-2": { x: 2930, y: 300 },
+      "4-3": { x: 3060, y: 300 },
+      "4-4": { x: 3190, y: 300 },
+      "4-S": { x: 3190, y: 450, side: true },
+      "4-B": { x: 3340, y: 300, boss: true }
     }
   }
 };
