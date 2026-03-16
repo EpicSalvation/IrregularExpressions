@@ -489,7 +489,7 @@ const CAMPAIGN = [
       }
 
     ] // end challenges
-  }  // end world-2
+  },  // end world-2
 
   // ═══════════════════════════════════════════════════════════
   // WORLD 3 — The Validation Department
