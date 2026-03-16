@@ -9,6 +9,204 @@
 //  CAMPAIGN DATA — World 1 (full)
 // ────────────────────────────────────────────────────
 const CAMPAIGN = [
+
+  // ═══════════════════════════════════════════════════
+  //  WORLD 0 — Tutorial / SETI Orientation
+  // ═══════════════════════════════════════════════════
+  {
+    id: "world-0",
+    title: "SETI Orientation",
+    subtitle: "Learn the tools.",
+    narrative: "Welcome to the SETI Institute. Your first week as a data intern starts now. The mission sounds thrilling — scanning the cosmos for signs of intelligent life. The reality? Terabytes of raw telescope data, mountains of noise, and a terminal. Your supervisor slides you a keyboard and says two words: learn regex.",
+    conceptsIntroduced: ["literal matching", "dot wildcard (.)", "one-or-more (+)"],
+    challenges: [
+
+      // ─── Challenge 0-1 ──────────────────────────────
+      {
+        id: "0-1",
+        title: "Welcome Aboard",
+        briefing: "Your first assignment: scan last night's telescope log and pull every line marked as a signal event. Signal lines all contain the word SIGNAL — nothing else in the log does.",
+        scenario: "The lead analyst needs a clean list of signal events from last night's sweep before the morning briefing. The log is full of noise, calibration, and status entries that need to be filtered out.",
+        learnMore: "A regex is a pattern you use to search text. At its simplest, a pattern is just the literal text you're looking for.\n\nThe pattern SIGNAL matches any line containing the exact sequence of characters S-I-G-N-A-L. Case matters: signal would not match SIGNAL.\n\nThis is where every regex journey starts — just describe exactly what you're looking for, character by character.",
+        type: "match",
+        corpus: [
+          "SIGNAL received on band L at 03:42:11",
+          "NOISE burst detected on array 4",
+          "SIGNAL candidate at 1420 MHz logged",
+          "CALIBRATION sequence complete",
+          "SIGNAL anomaly flagged for review",
+          "STATUS telescope array nominal"
+        ],
+        mustMatch: [
+          "SIGNAL received on band L at 03:42:11",
+          "SIGNAL candidate at 1420 MHz logged",
+          "SIGNAL anomaly flagged for review"
+        ],
+        mustNotMatch: [
+          "NOISE burst detected on array 4",
+          "CALIBRATION sequence complete",
+          "STATUS telescope array nominal"
+        ],
+        par: 6,
+        baseXP: 25,
+        parBonusXP: 10,
+        referenceSolution: "SIGNAL",
+        hint: "The simplest regex is the exact text you want to find.",
+        hintCost: 5,
+        conceptNote: "A literal pattern matches text exactly as written. SIGNAL finds every line containing SIGNAL — simple as that. Most regex patterns start here.",
+        isSideChallenge: false,
+        isBoss: false
+      },
+
+      // ─── Challenge 0-2 ──────────────────────────────
+      {
+        id: "0-2",
+        title: "Transmission Variants",
+        briefing: "Three legacy receiver arrays log their status pings with slightly different separators: STATUS_OK, STATUS-OK, and STATUS OK. The monitoring dashboard needs one pattern to catch all three.",
+        scenario: "The monitoring system aggregates feeds from three legacy systems that each evolved independently. You can't change the source systems — you need one pattern flexible enough to handle all their status formats.",
+        learnMore: "In regex, the dot . is a wildcard. It matches any single character — a letter, digit, symbol, or even a space.\n\nThis is useful when data comes from different sources with slightly different formatting. Instead of writing three separate patterns, one pattern with a dot absorbs all variants.\n\nPrecision: . matches exactly one character — a placeholder for 'I don't care what's here, as long as something is.'",
+        type: "match",
+        corpus: [
+          "STATUS_OK receiver array 1 online",
+          "STATUS-OK receiver array 2 verified",
+          "STATUS OK receiver array 3 aligned",
+          "STATUS FAILED array 4 offline",
+          "NO_STATUS_DATA available",
+          "SYSTEM STATUS running"
+        ],
+        mustMatch: [
+          "STATUS_OK receiver array 1 online",
+          "STATUS-OK receiver array 2 verified",
+          "STATUS OK receiver array 3 aligned"
+        ],
+        mustNotMatch: [
+          "STATUS FAILED array 4 offline",
+          "NO_STATUS_DATA available",
+          "SYSTEM STATUS running"
+        ],
+        par: 9,
+        baseXP: 25,
+        parBonusXP: 10,
+        referenceSolution: "STATUS.OK",
+        hint: "A single character differs between the three lines you want. There's a wildcard in regex that matches any one character.",
+        hintCost: 5,
+        conceptNote: "The dot . matches any single character. STATUS.OK matches STATUS_OK, STATUS-OK, and STATUS OK — three separators, one pattern.",
+        isSideChallenge: false,
+        isBoss: false
+      },
+
+      // ─── Challenge 0-3 ──────────────────────────────
+      {
+        id: "0-3",
+        title: "Signal Trace",
+        briefing: "The array controller logs every active receiver with its identifier. All active array lines start with ARRAY_ followed by the array ID — which varies widely in format and length. Match them all.",
+        scenario: "The array management system needs to isolate all active array entries from the mixed-source log. Array IDs were assigned by different teams over the years and follow no consistent naming convention.",
+        learnMore: "The + quantifier means 'one or more of the preceding element.'\n\nWhen combined with . (any character), .+ matches any sequence of one or more characters.\n\nARRAY_.+ means: the literal text ARRAY_ followed by at least one character of anything. This handles any identifier regardless of what it is or how long it is.\n\nNote the difference: . matches exactly one character, .+ matches one or more — as many as needed.",
+        type: "match",
+        corpus: [
+          "ARRAY_1 signal acquired",
+          "ARRAY_NORTH alignment complete",
+          "ARRAY_7B frequency locked",
+          "BEACON_7 ping sent",
+          "SECTOR_A offline",
+          "RELAY station standby"
+        ],
+        mustMatch: [
+          "ARRAY_1 signal acquired",
+          "ARRAY_NORTH alignment complete",
+          "ARRAY_7B frequency locked"
+        ],
+        mustNotMatch: [
+          "BEACON_7 ping sent",
+          "SECTOR_A offline",
+          "RELAY station standby"
+        ],
+        par: 8,
+        baseXP: 25,
+        parBonusXP: 10,
+        referenceSolution: "ARRAY_.+",
+        hint: "You need to match anything that comes after ARRAY_ — regardless of what it is. The dot matches one character. How do you match one or more?",
+        hintCost: 5,
+        conceptNote: ".+ matches one or more of any character. Combined with a literal prefix, it captures open-ended content after a known anchor.",
+        isSideChallenge: false,
+        isBoss: false
+      },
+
+      // ─── Side Challenge 0-S ─────────────────────────
+      {
+        id: "0-S",
+        title: "Cross-Band Signals",
+        briefing: "The signal router tags verified cross-band transmissions as TX followed by one separator character and then SIGNAL. Identify all properly tagged transmissions — filter out noise and malformed entries.",
+        scenario: "The cross-band router uses a two-part tag to mark verified transmissions. Some lines in the overnight log are noise or malformed tags that shouldn't pass through to the processing pipeline.",
+        type: "match",
+        corpus: [
+          "TX.SIGNAL cross-band verified",
+          "TX-SIGNAL carrier confirmed",
+          "TX_SIGNAL encoding active",
+          "TX NOISE background radiation",
+          "EXTRA SIGNAL detected",
+          "TXX SIGNAL double-tagged error"
+        ],
+        mustMatch: [
+          "TX.SIGNAL cross-band verified",
+          "TX-SIGNAL carrier confirmed",
+          "TX_SIGNAL encoding active"
+        ],
+        mustNotMatch: [
+          "TX NOISE background radiation",
+          "EXTRA SIGNAL detected",
+          "TXX SIGNAL double-tagged error"
+        ],
+        par: 9,
+        baseXP: 0,
+        parBonusXP: 75,
+        referenceSolution: "TX.SIGNAL",
+        hint: "TX and SIGNAL are literal. There is exactly one character between them that varies.",
+        hintCost: 5,
+        conceptNote: "TX.SIGNAL uses the dot as a precise one-character wildcard — a single placeholder, not the start of .+. Sometimes precision is the point.",
+        isSideChallenge: true,
+        isBoss: false
+      },
+
+      // ─── Boss Challenge 0-B ─────────────────────────
+      {
+        id: "0-B",
+        title: "First Deployment",
+        briefing: "Last night's consolidated log contains live signal reports with the format: LIVE, a separator character, SIGNAL, followed by report data. Isolate every valid live signal report from the noise.",
+        scenario: "The night shift supervisor needs a clean pull of every valid live signal report from last night's consolidated system log before the incident review board convenes.",
+        type: "match",
+        corpus: [
+          "LIVE.SIGNAL data stream active",
+          "LIVE-SIGNAL carrier wave detected",
+          "LIVE_SIGNAL frequency lock confirmed",
+          "ARCHIVED.SIGNAL historical record",
+          "LIVE DATA nominal scan",
+          "SIGNAL NOISE background interference"
+        ],
+        mustMatch: [
+          "LIVE.SIGNAL data stream active",
+          "LIVE-SIGNAL carrier wave detected",
+          "LIVE_SIGNAL frequency lock confirmed"
+        ],
+        mustNotMatch: [
+          "ARCHIVED.SIGNAL historical record",
+          "LIVE DATA nominal scan",
+          "SIGNAL NOISE background interference"
+        ],
+        par: 13,
+        baseXP: 75,
+        parBonusXP: 25,
+        referenceSolution: "LIVE.SIGNAL.+",
+        hint: "You need LIVE + any separator + SIGNAL + any content after. You've seen both of these tools this world.",
+        hintCost: 10,
+        conceptNote: "LIVE.SIGNAL.+ combines a literal prefix, a single-character wildcard, another literal, and a one-or-more tail. Real patterns rarely use just one concept.",
+        isSideChallenge: false,
+        isBoss: true
+      }
+
+    ] // end world-0 challenges
+  }, // end world-0
+
   {
     id: "world-1",
     title: "Log File Detective",
@@ -1168,50 +1366,60 @@ function updateTitleBadge() {
 //  CAMPAIGN MAP — SVG node graph
 // ────────────────────────────────────────────────────
 
-// Layout constants for World 1
+// Layout constants for all worlds
 const MAP_LAYOUT = {
-  "world-1": {
+  "world-0": {
     worldNode: { x: 120, y: 300 },
     challenges: {
-      "1-1": { x: 250, y: 300 },
-      "1-2": { x: 380, y: 300 },
-      "1-3": { x: 510, y: 300 },
-      "1-4": { x: 640, y: 300 },
-      "1-S": { x: 640, y: 450, side: true },
-      "1-B": { x: 790, y: 300, boss: true }
+      "0-1": { x: 250, y: 300 },
+      "0-2": { x: 380, y: 300 },
+      "0-3": { x: 510, y: 300 },
+      "0-S": { x: 510, y: 450, side: true },
+      "0-B": { x: 660, y: 300, boss: true }
+    }
+  },
+  "world-1": {
+    worldNode: { x: 840, y: 300 },
+    challenges: {
+      "1-1": { x: 970, y: 300 },
+      "1-2": { x: 1100, y: 300 },
+      "1-3": { x: 1230, y: 300 },
+      "1-4": { x: 1360, y: 300 },
+      "1-S": { x: 1360, y: 450, side: true },
+      "1-B": { x: 1510, y: 300, boss: true }
     }
   },
   "world-2": {
-    worldNode: { x: 970, y: 300 },
+    worldNode: { x: 1690, y: 300 },
     challenges: {
-      "2-1": { x: 1100, y: 300 },
-      "2-2": { x: 1230, y: 300 },
-      "2-3": { x: 1360, y: 300 },
-      "2-4": { x: 1490, y: 300 },
-      "2-S": { x: 1490, y: 450, side: true },
-      "2-B": { x: 1640, y: 300, boss: true }
+      "2-1": { x: 1820, y: 300 },
+      "2-2": { x: 1950, y: 300 },
+      "2-3": { x: 2080, y: 300 },
+      "2-4": { x: 2210, y: 300 },
+      "2-S": { x: 2210, y: 450, side: true },
+      "2-B": { x: 2360, y: 300, boss: true }
     }
   },
   "world-3": {
-    worldNode: { x: 1820, y: 300 },
+    worldNode: { x: 2540, y: 300 },
     challenges: {
-      "3-1": { x: 1950, y: 300 },
-      "3-2": { x: 2080, y: 300 },
-      "3-3": { x: 2210, y: 300 },
-      "3-4": { x: 2340, y: 300 },
-      "3-S": { x: 2340, y: 450, side: true },
-      "3-B": { x: 2490, y: 300, boss: true }
+      "3-1": { x: 2670, y: 300 },
+      "3-2": { x: 2800, y: 300 },
+      "3-3": { x: 2930, y: 300 },
+      "3-4": { x: 3060, y: 300 },
+      "3-S": { x: 3060, y: 450, side: true },
+      "3-B": { x: 3210, y: 300, boss: true }
     }
   },
   "world-4": {
-    worldNode: { x: 2670, y: 300 },
+    worldNode: { x: 3390, y: 300 },
     challenges: {
-      "4-1": { x: 2800, y: 300 },
-      "4-2": { x: 2930, y: 300 },
-      "4-3": { x: 3060, y: 300 },
-      "4-4": { x: 3190, y: 300 },
-      "4-S": { x: 3190, y: 450, side: true },
-      "4-B": { x: 3340, y: 300, boss: true }
+      "4-1": { x: 3520, y: 300 },
+      "4-2": { x: 3650, y: 300 },
+      "4-3": { x: 3780, y: 300 },
+      "4-4": { x: 3910, y: 300 },
+      "4-S": { x: 3910, y: 450, side: true },
+      "4-B": { x: 4060, y: 300, boss: true }
     }
   }
 };
