@@ -418,35 +418,34 @@ const CAMPAIGN = [
       // ─── Side Challenge 2-S ─────────────────────────
       {
         id: "2-S",
-        title: "Bad Packets",
-        briefing: "Signal color-maps use 6-digit hex codes — digits 0-9 and uppercase A-F only. Flag any packet containing a character outside that range. It needs to be re-transmitted.",
-        scenario: "The visual mapping system only accepts strict uppercase hex. Packets with lowercase letters or out-of-range characters will crash the renderer.",
+        title: "Transcription Errors",
+        briefing: "Automated digit readers occasionally confuse numerals with similar-looking letters — 0 as o, 1 as l, 5 as s. Any reading containing a lowercase character must be flagged for re-capture.",
         type: "exclude",
         corpus: [
-          "#A4F3C2 sector_1",
-          "#0B9E1D sector_2",
-          "#FFD700 sector_3",
-          "#G4A1B2 sector_4",
-          "#4b9e1d sector_5",
-          "#A4F3Z2 sector_6"
+          "READING:449821",
+          "READING:003847",
+          "READING:120044",
+          "READING:44982l",
+          "READING:oo3847",
+          "READING:12s044"
         ],
         mustMatch: [
-          "#G4A1B2 sector_4",
-          "#4b9e1d sector_5",
-          "#A4F3Z2 sector_6"
+          "READING:44982l",
+          "READING:oo3847",
+          "READING:12s044"
         ],
         mustNotMatch: [
-          "#A4F3C2 sector_1",
-          "#0B9E1D sector_2",
-          "#FFD700 sector_3"
+          "READING:449821",
+          "READING:003847",
+          "READING:120044"
         ],
-        par: 9,
+        par: 5,
         baseXP: 0,
         parBonusXP: 200,
-        referenceSolution: "[G-Za-z]",
-        hint: "Valid hex uses 0-9 and A-F only. Any letter outside A-F range — or any lowercase letter — is invalid.",
+        referenceSolution: "[a-z]",
+        hint: "Every legitimate reading uses only digits in the value field. What character class covers any lowercase letter?",
         hintCost: 10,
-        conceptNote: "[G-Za-z] combines two ranges: G-Z catches uppercase letters beyond F, and a-z catches any lowercase. Neither range includes the valid A-F uppercase digits.",
+        conceptNote: "[a-z] matches any single lowercase letter. In a field that should be purely numeric, one lowercase character anywhere in the line is enough to flag it as a transcription error.",
         isSideChallenge: true,
         isBoss: false
       },
