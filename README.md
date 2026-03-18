@@ -40,14 +40,14 @@ Six challenges set at the SETI Institute, where an anomalous overnight transmiss
 
 ## Running it
 
-Open `irregular-expression.html` in any modern browser. No server required.
+Open `index.html` in any modern browser. No server required.
 
 ---
 
 ## File structure
 
 ```
-irregular-expression.html   — markup and screen layout
+index.html                  — markup and screen layout
 irregular-expression.css    — all styles (CSS custom properties for easy reskin)
 irregular-expression.js     — campaign data, validation engine, screen logic
 ```

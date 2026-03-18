@@ -1367,60 +1367,61 @@ function updateTitleBadge() {
 //  CAMPAIGN MAP — SVG node graph
 // ────────────────────────────────────────────────────
 
-// Layout constants for all worlds
+// Layout constants for all worlds — each world spans ~900px so roughly one fills the viewport
+const WORLD_SPACING = 900;
 const MAP_LAYOUT = {
   "world-0": {
     worldNode: { x: 120, y: 300 },
     challenges: {
-      "0-1": { x: 250, y: 300 },
-      "0-2": { x: 380, y: 300 },
-      "0-3": { x: 510, y: 300 },
-      "0-S": { x: 510, y: 450, side: true },
-      "0-B": { x: 660, y: 300, boss: true }
+      "0-1": { x: 280, y: 300 },
+      "0-2": { x: 440, y: 300 },
+      "0-3": { x: 600, y: 300 },
+      "0-S": { x: 600, y: 460, side: true },
+      "0-B": { x: 780, y: 300, boss: true }
     }
   },
   "world-1": {
-    worldNode: { x: 840, y: 300 },
+    worldNode: { x: 120 + WORLD_SPACING, y: 300 },
     challenges: {
-      "1-1": { x: 970, y: 300 },
-      "1-2": { x: 1100, y: 300 },
-      "1-3": { x: 1230, y: 300 },
-      "1-4": { x: 1360, y: 300 },
-      "1-S": { x: 1360, y: 450, side: true },
-      "1-B": { x: 1510, y: 300, boss: true }
+      "1-1": { x: 280 + WORLD_SPACING, y: 300 },
+      "1-2": { x: 420 + WORLD_SPACING, y: 300 },
+      "1-3": { x: 560 + WORLD_SPACING, y: 300 },
+      "1-4": { x: 700 + WORLD_SPACING, y: 300 },
+      "1-S": { x: 700 + WORLD_SPACING, y: 460, side: true },
+      "1-B": { x: 860 + WORLD_SPACING, y: 300, boss: true }
     }
   },
   "world-2": {
-    worldNode: { x: 1690, y: 300 },
+    worldNode: { x: 120 + WORLD_SPACING * 2, y: 300 },
     challenges: {
-      "2-1": { x: 1820, y: 300 },
-      "2-2": { x: 1950, y: 300 },
-      "2-3": { x: 2080, y: 300 },
-      "2-4": { x: 2210, y: 300 },
-      "2-S": { x: 2210, y: 450, side: true },
-      "2-B": { x: 2360, y: 300, boss: true }
+      "2-1": { x: 280 + WORLD_SPACING * 2, y: 300 },
+      "2-2": { x: 420 + WORLD_SPACING * 2, y: 300 },
+      "2-3": { x: 560 + WORLD_SPACING * 2, y: 300 },
+      "2-4": { x: 700 + WORLD_SPACING * 2, y: 300 },
+      "2-S": { x: 700 + WORLD_SPACING * 2, y: 460, side: true },
+      "2-B": { x: 860 + WORLD_SPACING * 2, y: 300, boss: true }
     }
   },
   "world-3": {
-    worldNode: { x: 2540, y: 300 },
+    worldNode: { x: 120 + WORLD_SPACING * 3, y: 300 },
     challenges: {
-      "3-1": { x: 2670, y: 300 },
-      "3-2": { x: 2800, y: 300 },
-      "3-3": { x: 2930, y: 300 },
-      "3-4": { x: 3060, y: 300 },
-      "3-S": { x: 3060, y: 450, side: true },
-      "3-B": { x: 3210, y: 300, boss: true }
+      "3-1": { x: 280 + WORLD_SPACING * 3, y: 300 },
+      "3-2": { x: 420 + WORLD_SPACING * 3, y: 300 },
+      "3-3": { x: 560 + WORLD_SPACING * 3, y: 300 },
+      "3-4": { x: 700 + WORLD_SPACING * 3, y: 300 },
+      "3-S": { x: 700 + WORLD_SPACING * 3, y: 460, side: true },
+      "3-B": { x: 860 + WORLD_SPACING * 3, y: 300, boss: true }
     }
   },
   "world-4": {
-    worldNode: { x: 3390, y: 300 },
+    worldNode: { x: 120 + WORLD_SPACING * 4, y: 300 },
     challenges: {
-      "4-1": { x: 3520, y: 300 },
-      "4-2": { x: 3650, y: 300 },
-      "4-3": { x: 3780, y: 300 },
-      "4-4": { x: 3910, y: 300 },
-      "4-S": { x: 3910, y: 450, side: true },
-      "4-B": { x: 4060, y: 300, boss: true }
+      "4-1": { x: 280 + WORLD_SPACING * 4, y: 300 },
+      "4-2": { x: 420 + WORLD_SPACING * 4, y: 300 },
+      "4-3": { x: 560 + WORLD_SPACING * 4, y: 300 },
+      "4-4": { x: 700 + WORLD_SPACING * 4, y: 300 },
+      "4-S": { x: 700 + WORLD_SPACING * 4, y: 460, side: true },
+      "4-B": { x: 860 + WORLD_SPACING * 4, y: 300, boss: true }
     }
   }
 };
@@ -1643,6 +1644,42 @@ function renderMap() {
       svg.appendChild(g);
     });
   }); // end CAMPAIGN.forEach
+
+  // Auto-scroll to the first available (next) challenge
+  scrollMapToNextChallenge(progress);
+}
+
+function scrollMapToNextChallenge(progress) {
+  let targetX = null;
+  for (const world of CAMPAIGN) {
+    const layout = MAP_LAYOUT[world.id];
+    if (!layout) continue;
+    for (const ch of world.challenges) {
+      if (getChallengeState(ch.id, progress) === "available") {
+        const pos = layout.challenges[ch.id];
+        if (pos) { targetX = pos.x; break; }
+      }
+    }
+    if (targetX !== null) break;
+  }
+  // If all complete, scroll to the last world
+  if (targetX === null) {
+    const lastWorld = CAMPAIGN[CAMPAIGN.length - 1];
+    const lastLayout = MAP_LAYOUT[lastWorld.id];
+    if (lastLayout) targetX = lastLayout.worldNode.x;
+  }
+  if (targetX === null) return;
+
+  const container = document.querySelector(".map-container");
+  const svgEl = document.getElementById("map-svg");
+  // Convert SVG coordinate to pixel position within the rendered SVG element
+  const svgWidth = svgEl.getBoundingClientRect().width || svgEl.clientWidth;
+  const viewBoxWidth = 4700;
+  const scale = svgWidth / viewBoxWidth;
+  const pixelX = targetX * scale;
+  // Center the target in the viewport
+  const scrollTarget = pixelX - container.clientWidth / 2;
+  container.scrollLeft = Math.max(0, scrollTarget);
 }
 
 // ────────────────────────────────────────────────────
