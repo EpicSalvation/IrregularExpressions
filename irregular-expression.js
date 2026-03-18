@@ -243,7 +243,7 @@ const CAMPAIGN = [
           "[INFO] Shutdown complete",
           "[INFO] Last ERROR cleared at 07:58"
         ],
-        par: 3,
+        par: 11,
         baseXP: 50,
         parBonusXP: 25,
         referenceSolution: "\\[ERROR\\].*",
@@ -281,7 +281,7 @@ const CAMPAIGN = [
         mustNotMatch: [
           "2024-03-14 22:01:55"
         ],
-        par: 10,
+        par: 25,
         baseXP: 75,
         parBonusXP: 25,
         referenceSolution: "2024.03.15.\\d\\d:\\d\\d:\\d\\d",
@@ -322,7 +322,7 @@ const CAMPAIGN = [
           "system REBOOT initiated",
           "session timeout after 30 seconds"
         ],
-        par: 7,
+        par: 8,
         baseXP: 75,
         parBonusXP: 25,
         referenceSolution: "user_\\d+",
@@ -361,7 +361,7 @@ const CAMPAIGN = [
         mustNotMatch: [
           "[ERROR] /api/users endpoint unreachable"
         ],
-        par: 10,
+        par: 29,
         baseXP: 100,
         parBonusXP: 50,
         referenceSolution: "[A-Z]+ /api/\\w+ (\\[.*\\] )?\\d+",
@@ -397,7 +397,7 @@ const CAMPAIGN = [
           "Version 2.0.1 deployed",
           "User 10 logged out"
         ],
-        par: 16,
+        par: 19,
         baseXP: 0,
         parBonusXP: 150,
         referenceSolution: "\\d+\\.\\d+\\.\\d+\\.\\d+",
@@ -437,7 +437,7 @@ const CAMPAIGN = [
           "2024-01-20 04:00:01 system REBOOT",
           "2024-01-20 14:03:22 system HEALTH check passed"
         ],
-        par: 4,
+        par: 25,
         baseXP: 150,
         parBonusXP: 50,
         referenceSolution: "2024-01-20 03:\\d\\d:\\d\\d.*",
@@ -491,7 +491,7 @@ const CAMPAIGN = [
           "BAND_Q: 45 GHz calibration fault",
           "SATELLITE_XS3: telemetry packet received"
         ],
-        par: 7,
+        par: 11,
         baseXP: 75,
         parBonusXP: 25,
         referenceSolution: "BAND_[LSXC]",
@@ -675,7 +675,7 @@ const CAMPAIGN = [
           "SBETA:A4F3C2",
           "Lsigma:!DEAD!"
         ],
-        par: 17,
+        par: 22,
         baseXP: 175,
         parBonusXP: 75,
         referenceSolution: "[LSXC][a-z]+:[0-9A-F]+",
@@ -832,7 +832,7 @@ const CAMPAIGN = [
           "sector code:PQRST",
           "sector code:ABCDEF"
         ],
-        par: 10,
+        par: 12,
         baseXP: 75,
         parBonusXP: 35,
         referenceSolution: ":[A-Z]{2,4}$",
@@ -872,6 +872,7 @@ const CAMPAIGN = [
         baseXP: 0,
         parBonusXP: 200,
         referenceSolution: "#\\w*[G-Za-z]",
+        learnMore: "Sometimes you're not looking for what's right — you're hunting for what's wrong.\n\nOne approach: anchor to a known starting point, use a wildcard to skip past anything that could be valid, then require a character that falls outside the allowed set.\n\nYou don't need to match the entire hex code. You just need to find the first thing that shouldn't be there.",
         hint: "Start from the # to avoid matching the SECTOR labels. Use * to skip over any valid hex characters, then require a character that falls outside the valid range.",
         hintCost: 10,
         conceptNote: "#\\w*[G-Za-z] anchors to the hex block via #, uses \\w* to skip any leading valid characters, then requires an invalid one. The SECTOR labels are never reached because the pattern always starts from #.",
@@ -956,7 +957,7 @@ const CAMPAIGN = [
           "PROBE-1 DELTA: active",
           "PROBE-3 EPSILON: active"
         ],
-        par: 9,
+        par: 10,
         baseXP: 75,
         parBonusXP: 35,
         referenceSolution: "ALPHA|BETA",
@@ -992,7 +993,7 @@ const CAMPAIGN = [
           "ELEVATED NOISE detected",
           "CRITICAL STATUS — sector gamma"
         ],
-        par: 24,
+        par: 25,
         baseXP: 75,
         parBonusXP: 35,
         referenceSolution: "(NOMINAL|ELEVATED) STATUS",
@@ -1068,7 +1069,7 @@ const CAMPAIGN = [
           "WARN-042:ERR",
           "DEBUG-042:LOG"
         ],
-        par: 28,
+        par: 30,
         baseXP: 100,
         parBonusXP: 50,
         referenceSolution: "^(WARN-\\d{3}|INFO-\\d{5}):LOG$",
@@ -1106,7 +1107,7 @@ const CAMPAIGN = [
           "HS-ALPHA-9834-OK",
           "HS-BETA-142-OK"
         ],
-        par: 28,
+        par: 31,
         baseXP: 0,
         parBonusXP: 200,
         referenceSolution: "HS-(ALPHA-\\d{3}|BETA-\\d{4})-OK",
@@ -1145,7 +1146,7 @@ const CAMPAIGN = [
           "PRB:042:FAIL",
           "XMT:042:OK"
         ],
-        par: 26,
+        par: 27,
         baseXP: 175,
         parBonusXP: 75,
         referenceSolution: "^(PRB:\\d{3}|RLY:\\d{4}):OK$",
@@ -1692,7 +1693,7 @@ function loadChallenge(challengeId) {
   const learnPanel   = document.getElementById("learn-more-panel");
   const learnToggle  = document.getElementById("learn-more-toggle");
   const learnChevron = document.getElementById("learn-more-chevron");
-  const showLearn = !challenge.isSideChallenge && !challenge.isBoss && !!challenge.learnMore;
+  const showLearn = !challenge.isBoss && !!challenge.learnMore;
   learnSection.hidden = !showLearn;
   if (showLearn) {
     learnText.textContent = challenge.learnMore;
