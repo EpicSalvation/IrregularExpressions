@@ -211,7 +211,7 @@ const CAMPAIGN = [
     id: "world-1",
     title: "Log File Detective",
     subtitle: "Pull signal from noise.",
-    narrative: "You're a signal analyst at the SETI Institute. An anomalous transmission was logged overnight and the data pipeline is full of noise. Your tools are a terminal and your pattern matching ability.",
+    narrative: "Orientation is over. You've been assigned to the night shift — monitoring live telescope feeds, flagging anything unusual. It's mostly routine. Then, buried in last night's logs, you spot something the automated filters missed: an anomalous signal, repeating at regular intervals. Your supervisor leans over your shoulder and says: pull everything you can from those logs.",
     conceptsIntroduced: ["literals", "dot (any char)", "quantifiers: * + ?", "escaping with \\"],
     challenges: [
 
@@ -459,7 +459,7 @@ const CAMPAIGN = [
     id: "world-2",
     title: "Data Extraction Bureau",
     subtitle: "Structure the signal.",
-    narrative: "The anomaly is confirmed. The Bureau of Signal Intelligence has assumed control of the decryption effort. The transmission contains structured data — field codes, payloads, validity markers. Your tools are the same. The noise is different.",
+    narrative: "Your discovery made it up the chain. The anomaly is confirmed — it's structured, not random. SETI has never seen anything like it: field codes, embedded payloads, validity markers woven into the signal. They're calling you the one who found it, and now they need you to help decode it. The data is cleaner here, but the patterns are more complex.",
     conceptsIntroduced: ["character classes []", "ranges [a-z] [A-Z] [0-9]", "shorthand \\d \\w \\s", "negated classes [^]"],
     challenges: [
 
@@ -696,7 +696,7 @@ const CAMPAIGN = [
     id: "world-3",
     title: "The Validation Department",
     subtitle: "Exact specifications. No exceptions.",
-    narrative: "The anomaly data is being analyzed. You've been transferred to the Validation Department. Every transmission must conform to exact format specifications before it can be processed.",
+    narrative: "The decoded fragments are pouring in faster than the team can verify them. Half the data is corrupted — garbled headers, truncated codes, malformed timestamps. Before any of it can be analyzed, someone has to separate the clean transmissions from the noise. That someone is you. Every fragment must pass strict format checks. No exceptions.",
     conceptsIntroduced: ["start anchor ^", "end anchor $", "exact count {n}", "range count {n,m}", "zero-or-more *"],
     challenges: [
 
@@ -929,7 +929,7 @@ const CAMPAIGN = [
     id: "world-4",
     title: "Pattern Recognition Division",
     subtitle: "Multiple signals. One pattern.",
-    narrative: "The anomaly is broadcasting on multiple channels simultaneously. The Pattern Recognition Division is tasked with classifying and routing each signal type. A single pattern must handle many variants.",
+    narrative: "The signal isn't one transmission — it's many. Layered on top of each other, broadcast across multiple channels simultaneously. Some are probe telemetry. Some are handshake protocols. Some are something else entirely. The team needs you to classify and route each variant. One pattern per task. No room for error.",
     conceptsIntroduced: ["alternation |", "groups ()", "groups with quantifiers", "groups with alternation"],
     challenges: [
 

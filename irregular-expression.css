@@ -906,8 +906,8 @@ html, body {
 }
 
 .world-narrative-text {
-  font-size: 13px;
-  color: var(--color-muted);
+  font-size: 15px;
+  color: var(--color-text);
   font-style: italic;
   line-height: 1.5;
 }
