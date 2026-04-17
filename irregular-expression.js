@@ -2,6 +2,14 @@
    IRREGULAR EXPRESSION — application logic
    No frameworks. Pure ES2020+.
 ═══════════════════════════════════════════════════ */
+import {
+  fetchCurrentUser,
+  login as authLogin,
+  register as authRegister,
+  logout as authLogout,
+  fetchProgress,
+  pushProgress,
+} from './auth-client.js';
 
 "use strict";
 
@@ -1182,18 +1190,21 @@ const LEADERBOARD_STUB = [
 // ────────────────────────────────────────────────────
 const STORAGE_KEY = "rxg_progress";
 
+let _currentUser = null;   // { id, handle } when logged in, null for guests
+let _progressCache = null; // populated by initAuth() before init() runs
+
 function loadProgress() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch (_) {}
-  return { completedChallenges: [], xp: 0, scores: {} };
+  return _progressCache ?? { completedChallenges: [], xp: 0, scores: {} };
 }
 
 function saveProgress(progress) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
-  } catch (_) {}
+  _progressCache = progress;
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); } catch (_) {}
+  if (_currentUser) pushProgress(progress).catch(() => {});
+}
+
+function _readLocalProgress() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) ?? null; } catch (_) { return null; }
 }
 
 // ────────────────────────────────────────────────────
@@ -2079,6 +2090,108 @@ function showWorldComplete(world, progress) {
 }
 
 // ────────────────────────────────────────────────────
+//  AUTH
+// ────────────────────────────────────────────────────
+function updateAuthUI(user) {
+  const btn = document.getElementById("auth-status-btn");
+  if (!btn) return;
+  if (user) {
+    btn.textContent = `[${user.handle}] SIGN OUT`;
+    btn.onclick = async () => {
+      await authLogout();
+      _currentUser = null;
+      _progressCache = _readLocalProgress() ?? { completedChallenges: [], xp: 0, scores: {} };
+      updateAuthUI(null);
+      updateTitleBadge();
+    };
+  } else {
+    btn.textContent = "SIGN IN";
+    btn.onclick = () => document.getElementById("auth-modal").classList.remove("hidden");
+  }
+}
+
+function initAuthModal() {
+  const modal      = document.getElementById("auth-modal");
+  const tabs       = modal.querySelectorAll(".auth-tab");
+  const handleEl   = document.getElementById("auth-handle");
+  const emailEl    = document.getElementById("auth-email");
+  const passwordEl = document.getElementById("auth-password");
+  const rememberEl = document.getElementById("auth-remember");
+  const errorEl    = document.getElementById("auth-error");
+  const submitBtn  = document.getElementById("auth-submit-btn");
+  const guestBtn   = document.getElementById("auth-guest-btn");
+
+  let activeTab = "login";
+
+  tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      activeTab = tab.dataset.tab;
+      tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === activeTab));
+      handleEl.classList.toggle("hidden", activeTab !== "signup");
+      submitBtn.textContent = activeTab === "login" ? "SIGN IN" : "CREATE ACCOUNT";
+      errorEl.textContent = "";
+    });
+  });
+
+  guestBtn.addEventListener("click", () => {
+    modal.classList.add("hidden");
+  });
+
+  submitBtn.addEventListener("click", async () => {
+    errorEl.textContent = "";
+    const email    = emailEl.value.trim();
+    const password = passwordEl.value;
+    const handle   = handleEl.value.trim();
+
+    try {
+      let user;
+      if (activeTab === "login") {
+        user = await authLogin(email, password, rememberEl.checked);
+      } else {
+        user = await authRegister(handle, email, password);
+      }
+
+      // Merge: push local progress if it has more XP than cloud
+      const cloud = await fetchProgress().catch(() => null);
+      const local = _readLocalProgress();
+      if (local && (!cloud || local.xp > (cloud.xp ?? 0))) {
+        await pushProgress(local).catch(() => {});
+        _progressCache = local;
+      } else {
+        _progressCache = cloud ?? { completedChallenges: [], xp: 0, scores: {} };
+      }
+
+      _currentUser = user;
+      modal.classList.add("hidden");
+      updateAuthUI(user);
+      updateTitleBadge();
+    } catch (err) {
+      errorEl.textContent = err.message;
+    }
+  });
+}
+
+async function initAuth() {
+  _currentUser = await fetchCurrentUser().catch(() => null);
+
+  if (_currentUser) {
+    const cloud = await fetchProgress().catch(() => null);
+    const local = _readLocalProgress();
+    if (local && (!cloud || local.xp > (cloud.xp ?? 0))) {
+      _progressCache = local;
+      pushProgress(local).catch(() => {});
+    } else {
+      _progressCache = cloud ?? { completedChallenges: [], xp: 0, scores: {} };
+    }
+  } else {
+    _progressCache = _readLocalProgress() ?? { completedChallenges: [], xp: 0, scores: {} };
+  }
+
+  initAuthModal();
+  updateAuthUI(_currentUser);
+}
+
+// ────────────────────────────────────────────────────
 //  INIT
 // ────────────────────────────────────────────────────
 function init() {
@@ -2086,4 +2199,4 @@ function init() {
   goTo("screen-title");
 }
 
-init();
+initAuth().then(() => init());
