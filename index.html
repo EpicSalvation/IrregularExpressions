@@ -25,6 +25,7 @@
         <button class="btn btn-secondary" data-goto="screen-leaderboard">LEADERBOARD</button>
         <button class="btn btn-secondary" data-goto="screen-regularcade">REGULARCADE</button>
         <button class="btn btn-secondary" data-goto="screen-gallery">GALLERY</button>
+        <button class="btn btn-ghost" id="auth-status-btn">SIGN IN</button>
       </nav>
       <div class="title-xp-badge" id="title-xp-badge"></div>
     </div>
@@ -311,6 +312,25 @@
     </div>
   </div>
 
-  <script src="irregular-expression.js?v=1.1"></script>
+  <!-- Auth modal — shown when user clicks SIGN IN -->
+  <div id="auth-modal" class="auth-modal hidden" role="dialog" aria-modal="true" aria-label="Sign in or create account">
+    <div class="auth-modal-inner">
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">SIGN IN</button>
+        <button class="auth-tab" data-tab="signup">SIGN UP</button>
+      </div>
+      <input id="auth-handle" type="text" class="auth-input hidden" placeholder="HANDLE" autocomplete="username" maxlength="32" />
+      <input id="auth-email" type="email" class="auth-input" placeholder="EMAIL" autocomplete="email" />
+      <input id="auth-password" type="password" class="auth-input" placeholder="PASSWORD" autocomplete="current-password" />
+      <label class="auth-remember mono">
+        <input id="auth-remember" type="checkbox" /> REMEMBER ME
+      </label>
+      <div id="auth-error" class="auth-error mono"></div>
+      <button class="btn btn-primary btn-wide" id="auth-submit-btn">SIGN IN</button>
+      <button class="btn btn-ghost btn-wide" id="auth-guest-btn">PLAY AS GUEST →</button>
+    </div>
+  </div>
+
+  <script type="module" src="irregular-expression.js?v=1.2"></script>
 </body>
 </html>
