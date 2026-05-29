@@ -9,7 +9,7 @@ import {
   logout as authLogout,
   fetchProgress,
   pushProgress,
-} from './auth-client.js';
+} from './auth-client.js?v=1.6';
 
 "use strict";
 

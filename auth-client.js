@@ -22,6 +22,12 @@ export async function login(email, password, rememberMe = false) {
     method: 'POST',
     body: JSON.stringify({ email, password, rememberMe }),
   });
+  // apiFetch lets 401 through (so /auth/me can return null); for an actual
+  // login that means bad credentials, so surface it as an error.
+  if (res.status === 401) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error ?? 'Invalid email or password');
+  }
   return res.json();
 }
 
