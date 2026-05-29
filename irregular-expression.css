@@ -945,3 +945,94 @@ html, body {
   .result-screen { padding: 24px 14px; }
   .title-nav { width: 100%; max-width: 300px; }
 }
+
+/* ════════════════════════════════════════════════
+   UTILITY
+════════════════════════════════════════════════ */
+.hidden { display: none !important; }
+
+/* ════════════════════════════════════════════════
+   AUTH MODAL
+════════════════════════════════════════════════ */
+.auth-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 20, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.auth-modal-inner {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 32px 28px;
+  width: min(400px, 90vw);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.auth-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.auth-tab {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  padding: 8px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.auth-tab.active,
+.auth-tab:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.auth-input {
+  background: var(--color-surface2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 10px 12px;
+  width: 100%;
+  outline: none;
+  transition: var(--transition);
+}
+
+.auth-input:focus { border-color: var(--color-accent); }
+.auth-input::placeholder { color: var(--color-muted); }
+
+.auth-remember {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--color-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.auth-error {
+  color: var(--color-failure);
+  font-size: 12px;
+  min-height: 16px;
+}
+
+.btn-wide { width: 100%; }
