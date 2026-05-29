@@ -9,6 +9,10 @@ import progressRouter from './routes/progress.js';
 const MySQLStore = connectMySQLSession(session);
 const app = express();
 
+// Behind cPanel/Apache+Passenger, TLS terminates at the proxy and Node sees
+// plain HTTP. Trusting the proxy lets express-session set the `secure` cookie.
+app.set('trust proxy', 1);
+
 app.use(express.json());
 app.use(express.static('.'));
 
