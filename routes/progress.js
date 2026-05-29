@@ -16,7 +16,9 @@ router.get('/progress', requireAuth, async (req, res) => {
       'SELECT progress FROM users WHERE id = ?',
       [req.session.userId]
     );
-    res.json(rows[0]?.progress ?? EMPTY_PROGRESS);
+    const raw = rows[0]?.progress;
+    const progress = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    res.json(progress ?? EMPTY_PROGRESS);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
