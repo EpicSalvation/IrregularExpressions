@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="irregular-expression.css?v=1.2" />
+  <link rel="stylesheet" href="irregular-expression.css?v=1.5" />
 </head>
 <body>
 
@@ -46,7 +46,7 @@
       <span class="world-narrative-text" id="world-narrative-text"></span>
     </div>
     <div class="map-container">
-      <svg id="map-svg" class="map-svg" viewBox="0 0 4700 600" preserveAspectRatio="xMinYMid meet"></svg>
+      <svg id="map-svg" class="map-svg" viewBox="0 0 6500 600" preserveAspectRatio="xMinYMid meet"></svg>
     </div>
   </div>
 
@@ -247,12 +247,12 @@
       <div class="stub-screen-sub">Arcade of skill-specific mini-games</div>
       <div class="stub-unlock-msg" id="regularcade-unlock-msg">Unlocks after completing the campaign. You're 0% there.</div>
       <div class="arcade-tiles">
-        <div class="arcade-tile locked">
+        <div class="arcade-tile" id="arcade-tile-corpus-match">
           <div class="arcade-tile-icon">▣</div>
           <div class="arcade-tile-name">Corpus Match</div>
           <div class="arcade-tile-desc">Write patterns. No narrative. Pure signal.</div>
         </div>
-        <div class="arcade-tile locked">
+        <div class="arcade-tile" id="arcade-tile-timed-drill">
           <div class="arcade-tile-icon">⏱</div>
           <div class="arcade-tile-name">Timed Drill</div>
           <div class="arcade-tile-desc">Race the clock on a rapid-fire corpus set.</div>
@@ -262,7 +262,7 @@
           <div class="arcade-tile-name">Head-to-Head</div>
           <div class="arcade-tile-desc">Live opponent, same corpus, fastest correct answer wins. <em>Requires account.</em></div>
         </div>
-        <div class="arcade-tile locked">
+        <div class="arcade-tile" id="arcade-tile-crossword">
           <div class="arcade-tile-icon">⊞</div>
           <div class="arcade-tile-name">Regex Crossword</div>
           <div class="arcade-tile-desc">Every row and column must satisfy its own pattern.</div>
@@ -273,6 +273,200 @@
           <div class="arcade-tile-desc">Identify and repair a broken pattern using regex itself.</div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       CORPUS MATCH LIST SCREEN
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-corpus-match" class="screen">
+    <header class="screen-header">
+      <button class="btn btn-ghost btn-back" data-goto="screen-regularcade">← ARCADE</button>
+      <span class="screen-title-text">CORPUS MATCH</span>
+      <span></span>
+    </header>
+    <div class="arcade-list-content">
+      <div class="arcade-list-header">
+        <div class="arcade-list-icon">▣</div>
+        <div class="arcade-list-title">Corpus Match</div>
+        <div class="arcade-list-sub">Write a regex to match the target lines and reject everything else. No narrative. No hints. Pure signal.</div>
+      </div>
+      <div class="arcade-game-list" id="corpus-match-list"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       TIMED DRILL LIST SCREEN
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-timed-drill" class="screen">
+    <header class="screen-header">
+      <button class="btn btn-ghost btn-back" data-goto="screen-regularcade">← ARCADE</button>
+      <span class="screen-title-text">TIMED DRILL</span>
+      <span></span>
+    </header>
+    <div class="arcade-list-content">
+      <div class="arcade-list-header">
+        <div class="arcade-list-icon">⏱</div>
+        <div class="arcade-list-title">Timed Drill</div>
+        <div class="arcade-list-sub">Rapid-fire challenges. One shared timer. Solve each pattern as fast as you can — bonus XP if you beat the clock.</div>
+      </div>
+      <div class="arcade-game-list" id="timed-drill-list"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       TIMED DRILL GAMEPLAY SCREEN
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-timed-drill-play" class="screen">
+    <header class="screen-header">
+      <button class="btn btn-ghost btn-back" id="td-back-btn">← QUIT</button>
+      <span class="screen-title-text" id="td-header-title">TIMED DRILL</span>
+      <span class="td-timer mono" id="td-timer">0:00</span>
+    </header>
+
+    <div class="challenge-layout">
+      <div class="td-progress-bar">
+        <div class="td-progress-fill" id="td-progress-fill"></div>
+      </div>
+
+      <div class="challenge-meta">
+        <span class="challenge-id mono" id="td-step-label"></span>
+        <span class="challenge-title-text" id="td-step-title"></span>
+      </div>
+
+      <section class="challenge-briefing">
+        <div class="briefing-text" id="td-briefing-text"></div>
+      </section>
+
+      <section class="challenge-corpus">
+        <div class="section-label">CORPUS</div>
+        <div class="corpus-lines" id="td-corpus-lines"></div>
+      </section>
+
+      <section class="challenge-input-area">
+        <div class="section-label">YOUR PATTERN</div>
+        <div class="input-row">
+          <input
+            type="text"
+            id="td-regex-input"
+            class="regex-input mono"
+            placeholder="enter pattern…"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+          />
+          <span class="char-counter mono" id="td-char-counter">0 chars | par: —</span>
+          <span class="locked-in-indicator" id="td-locked-in" aria-live="polite"></span>
+        </div>
+        <div class="regex-error mono" id="td-regex-error" aria-live="assertive"></div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       TIMED DRILL RESULTS SCREEN
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-timed-drill-results" class="screen">
+    <div class="result-screen">
+      <div class="result-header">
+        <div class="result-status-label" id="td-result-label">DRILL COMPLETE</div>
+        <div class="result-challenge-id mono" id="td-result-title"></div>
+      </div>
+
+      <div class="td-results-body">
+        <div class="td-results-stats">
+          <div class="td-stat">
+            <div class="td-stat-label">Completed</div>
+            <div class="td-stat-value mono" id="td-result-completed"></div>
+          </div>
+          <div class="td-stat">
+            <div class="td-stat-label">Time</div>
+            <div class="td-stat-value mono" id="td-result-time"></div>
+          </div>
+          <div class="td-stat">
+            <div class="td-stat-label">At Par</div>
+            <div class="td-stat-value mono" id="td-result-at-par"></div>
+          </div>
+        </div>
+
+        <div class="xp-breakdown">
+          <div class="xp-row"><span>Base XP</span><span class="mono" id="td-xp-base"></span></div>
+          <div class="xp-row" id="td-xp-time-row"><span>Time Bonus</span><span class="mono" id="td-xp-time"></span></div>
+          <div class="xp-row xp-total-row"><span>Total</span><span class="mono" id="td-xp-total"></span></div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="td-result-continue-btn">BACK TO ARCADE →</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       REGEX CROSSWORD LIST SCREEN
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-crossword" class="screen">
+    <header class="screen-header">
+      <button class="btn btn-ghost btn-back" data-goto="screen-regularcade">← ARCADE</button>
+      <span class="screen-title-text">REGEX CROSSWORD</span>
+      <span></span>
+    </header>
+    <div class="arcade-list-content">
+      <div class="arcade-list-header">
+        <div class="arcade-list-icon">⊞</div>
+        <div class="arcade-list-title">Regex Crossword</div>
+        <div class="arcade-list-sub">Fill the grid so every row and column satisfies its regex pattern. Arrow keys and Tab to navigate.</div>
+      </div>
+      <div class="arcade-game-list" id="crossword-list"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       REGEX CROSSWORD GAMEPLAY SCREEN
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-crossword-play" class="screen">
+    <header class="screen-header">
+      <button class="btn btn-ghost btn-back" id="cw-back-btn">← QUIT</button>
+      <span class="screen-title-text" id="cw-header-title">CROSSWORD</span>
+      <span class="cw-error-count mono" id="cw-error-count"></span>
+    </header>
+
+    <div class="cw-play-layout">
+      <div class="cw-instructions muted">Fill each cell with one character. Green = row &amp; column both match.</div>
+      <div class="cw-grid-container" id="cw-grid"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       REGEX CROSSWORD RESULTS SCREEN
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-crossword-results" class="screen">
+    <div class="result-screen">
+      <div class="result-header">
+        <div class="result-status-label" id="cw-result-label">PUZZLE COMPLETE</div>
+        <div class="result-challenge-id mono" id="cw-result-title"></div>
+      </div>
+
+      <div class="td-results-body">
+        <div class="td-results-stats">
+          <div class="td-stat">
+            <div class="td-stat-label">Grid</div>
+            <div class="td-stat-value mono" id="cw-result-grid"></div>
+          </div>
+          <div class="td-stat">
+            <div class="td-stat-label">Difficulty</div>
+            <div class="td-stat-value mono" id="cw-result-difficulty"></div>
+          </div>
+        </div>
+
+        <div class="xp-breakdown">
+          <div class="xp-row"><span>Base XP</span><span class="mono" id="cw-xp-base"></span></div>
+          <div class="xp-row xp-total-row"><span>Total</span><span class="mono" id="cw-xp-total"></span></div>
+        </div>
+
+        <div class="cw-replay-note muted" id="cw-replay-note" style="display:none"></div>
+      </div>
+
+      <button class="btn btn-primary" id="cw-result-continue-btn">BACK TO ARCADE →</button>
     </div>
   </div>
 
@@ -311,6 +505,6 @@
     </div>
   </div>
 
-  <script src="irregular-expression.js?v=1.1"></script>
+  <script src="irregular-expression.js?v=1.5"></script>
 </body>
 </html>

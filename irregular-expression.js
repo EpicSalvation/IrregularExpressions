@@ -1158,9 +1158,675 @@ const CAMPAIGN = [
       }
 
     ] // end challenges
-  }  // end world-4
+  },  // end world-4
+
+  // ═══════════════════════════════════════════════════════════
+  // WORLD 5 — The Boundary Layer
+  // ═══════════════════════════════════════════════════════════
+  {
+    id: "world-5",
+    title: "The Boundary Layer",
+    subtitle: "Context is everything.",
+    narrative: "The transmission's structure runs deeper than anyone expected. Patterns that looked random are actually context-dependent — the same sequence means different things depending on what surrounds it. The team has hit a wall: their tools match content but ignore context. You need to see past the characters to the boundaries between them.",
+    conceptsIntroduced: ["word boundary \\b", "lookahead (?=...)", "negative lookahead (?!...)", "lookbehind (?<=...)"],
+    challenges: [
+
+      // ─── Challenge 5-1 ───────────────────────────────────────────
+      {
+        id: "5-1",
+        title: "Exact Callsign",
+        briefing: "The relay log contains the code RED in several contexts. Match only lines where RED appears as a standalone callsign — not embedded inside another word.",
+        scenario: "The routing system flags RED-priority transmissions, but the naive filter also catches REDIRECT, FILTERED, and BORED. The dispatcher needs exact callsign matches only.",
+        learnMore: "\\b is a word boundary — it matches the position between a word character (\\w) and a non-word character, or the start/end of the string.\n\n\\bRED\\b matches RED as a standalone word. It won't match the RED inside REDIRECT or BORED because those positions are between two word characters — no boundary exists there.\n\n\\b doesn't consume any characters. It's a zero-width assertion — it checks a condition about position, not content.",
+        type: "match",
+        corpus: [
+          "ALERT RED: priority transmission",
+          "SECTOR RED confirmed active",
+          "RED SIGNAL acquired on band L",
+          "REDIRECT to backup array",
+          "FILTERED noise on channel 4",
+          "BORED operator logged out"
+        ],
+        mustMatch: [
+          "ALERT RED: priority transmission",
+          "SECTOR RED confirmed active",
+          "RED SIGNAL acquired on band L"
+        ],
+        mustNotMatch: [
+          "REDIRECT to backup array",
+          "FILTERED noise on channel 4",
+          "BORED operator logged out"
+        ],
+        par: 7,
+        baseXP: 100,
+        parBonusXP: 35,
+        referenceSolution: "\\bRED\\b",
+        hint: "You need RED as a whole word, not as part of a longer word. There's a zero-width assertion that marks the boundary between word and non-word characters.",
+        hintCost: 10,
+        conceptNote: "\\b matches a word boundary — the position between a \\w character and a non-\\w character. \\bRED\\b ensures RED is a standalone word, not a substring of REDIRECT, FILTERED, or BORED.",
+        isSideChallenge: false,
+        isBoss: false
+      },
+
+      // ─── Challenge 5-2 ───────────────────────────────────────────
+      {
+        id: "5-2",
+        title: "Conditional Clearance",
+        briefing: "Sector names appear throughout the log, but only sectors followed by the status CLEAR are safe to route through. Match the sector entries — but only when CLEAR follows.",
+        scenario: "The routing algorithm needs sector names for path calculation, but only cleared sectors. The status must be checked without including it in the extracted match.",
+        learnMore: "A lookahead (?=...) checks whether a pattern follows the current position, without including it in the match.\n\nSECTOR_\\w+(?= CLEAR) matches the sector name only if CLEAR comes after it. The lookahead is zero-width — it asserts a condition but doesn't consume characters.\n\nThis is useful when you need to verify context without capturing it — like checking a badge before letting someone through a door.",
+        type: "match",
+        corpus: [
+          "SECTOR_alpha CLEAR for routing",
+          "SECTOR_beta CLEAR for routing",
+          "SECTOR_gamma CLEAR for routing",
+          "SECTOR_delta BLOCKED by interference",
+          "SECTOR_epsilon DEGRADED signal",
+          "SECTOR_zeta OFFLINE maintenance"
+        ],
+        mustMatch: [
+          "SECTOR_alpha CLEAR for routing",
+          "SECTOR_beta CLEAR for routing",
+          "SECTOR_gamma CLEAR for routing"
+        ],
+        mustNotMatch: [
+          "SECTOR_delta BLOCKED by interference",
+          "SECTOR_epsilon DEGRADED signal",
+          "SECTOR_zeta OFFLINE maintenance"
+        ],
+        par: 20,
+        baseXP: 100,
+        parBonusXP: 50,
+        referenceSolution: "SECTOR_\\w+(?= CLEAR)",
+        hint: "You need to match sector names, but only when a specific status follows. A lookahead checks what comes next without consuming it.",
+        hintCost: 10,
+        conceptNote: "(?= CLEAR) is a positive lookahead — it asserts that ' CLEAR' follows the current position, but doesn't include it in the match. The sector name is matched; the status is only verified.",
+        isSideChallenge: false,
+        isBoss: false
+      },
+
+      // ─── Challenge 5-3 ───────────────────────────────────────────
+      {
+        id: "5-3",
+        title: "Exclude the Compromised",
+        briefing: "All probe data should be processed — except probes flagged as COMPROMISED. Match probe entries that are NOT followed by COMPROMISED.",
+        scenario: "A firmware vulnerability was discovered in some probes. Their data is tainted and must be excluded from the analysis pipeline. Everything else goes through.",
+        learnMore: "A negative lookahead (?!...) asserts that a pattern does NOT follow the current position.\n\nPROBE_\\d+ (?!COMPROMISED) matches probe entries only when COMPROMISED doesn't follow. Like positive lookahead, it's zero-width — it checks a condition without consuming text.\n\nThe space before the lookahead is important here — it forces the digit sequence to be fully consumed before the status check begins.",
+        type: "match",
+        corpus: [
+          "PROBE_14 NOMINAL data_batch_77",
+          "PROBE_29 ACTIVE data_batch_82",
+          "PROBE_03 NOMINAL data_batch_91",
+          "PROBE_14 COMPROMISED quarantined",
+          "PROBE_29 COMPROMISED quarantined",
+          "PROBE_88 COMPROMISED quarantined"
+        ],
+        mustMatch: [
+          "PROBE_14 NOMINAL data_batch_77",
+          "PROBE_29 ACTIVE data_batch_82",
+          "PROBE_03 NOMINAL data_batch_91"
+        ],
+        mustNotMatch: [
+          "PROBE_14 COMPROMISED quarantined",
+          "PROBE_29 COMPROMISED quarantined",
+          "PROBE_88 COMPROMISED quarantined"
+        ],
+        par: 25,
+        baseXP: 100,
+        parBonusXP: 50,
+        referenceSolution: "PROBE_\\d+ (?!COMPROMISED)",
+        hint: "You want to match probe entries, but exclude specific ones. A negative lookahead asserts that something does NOT follow.",
+        hintCost: 10,
+        conceptNote: "(?!COMPROMISED) is a negative lookahead — it succeeds only when 'COMPROMISED' does NOT follow the current position. The space before it ensures the full probe ID is consumed, preventing the engine from backtracking to a shorter digit match.",
+        isSideChallenge: false,
+        isBoss: false
+      },
+
+      // ─── Challenge 5-4 ───────────────────────────────────────────
+      {
+        id: "5-4",
+        title: "Priority Payloads",
+        briefing: "Hex payload values appear throughout the log, but only payloads that follow a PRIORITY: tag are urgent. Match the hex payloads — but only when preceded by PRIORITY:.",
+        scenario: "The alert system needs to extract urgent payload values for immediate processing. Regular payloads are handled by the batch queue. The tag determines urgency, but only the payload value is needed.",
+        learnMore: "A lookbehind (?<=...) checks whether a pattern precedes the current position, without including it in the match.\n\n(?<=PRIORITY:)[A-F0-9]+ matches hex values only when PRIORITY: comes before them. Like lookahead, it's zero-width.\n\nLookbehinds let you filter by context that precedes your target — useful when you need the value but not the label.",
+        type: "match",
+        corpus: [
+          "PRIORITY:A4F3C2 route immediately",
+          "PRIORITY:0B9E1D route immediately",
+          "PRIORITY:FFD700 route immediately",
+          "ROUTINE:A4F3C2 queue for batch",
+          "DEFERRED:0B9E1D hold for review",
+          "ARCHIVED:FFD700 cold storage"
+        ],
+        mustMatch: [
+          "PRIORITY:A4F3C2 route immediately",
+          "PRIORITY:0B9E1D route immediately",
+          "PRIORITY:FFD700 route immediately"
+        ],
+        mustNotMatch: [
+          "ROUTINE:A4F3C2 queue for batch",
+          "DEFERRED:0B9E1D hold for review",
+          "ARCHIVED:FFD700 cold storage"
+        ],
+        par: 23,
+        baseXP: 125,
+        parBonusXP: 50,
+        referenceSolution: "(?<=PRIORITY:)[A-F0-9]+",
+        hint: "You need to match hex values, but only when they follow a specific label. A lookbehind checks what comes before without consuming it.",
+        hintCost: 10,
+        conceptNote: "(?<=PRIORITY:) is a positive lookbehind — it asserts that 'PRIORITY:' precedes the current position. Only the hex payload is matched; the label is verified but not consumed.",
+        isSideChallenge: false,
+        isBoss: false
+      },
+
+      // ─── Side Challenge 5-S ─────────────────────────────────────
+      {
+        id: "5-S",
+        title: "Ghost Frequencies",
+        briefing: "The spectrum analyzer detected signals on MHz frequencies. Match the numeric frequency values — but only when they appear after 'on ' and before ' MHz'.",
+        type: "match",
+        corpus: [
+          "signal detected on 1420 MHz hydrogen line",
+          "signal detected on 2400 MHz sweep band",
+          "signal detected on 5800 MHz carrier",
+          "error code 1420 in subsystem",
+          "array 2400 calibration complete",
+          "channel MHz1420 legacy format"
+        ],
+        mustMatch: [
+          "signal detected on 1420 MHz hydrogen line",
+          "signal detected on 2400 MHz sweep band",
+          "signal detected on 5800 MHz carrier"
+        ],
+        mustNotMatch: [
+          "error code 1420 in subsystem",
+          "array 2400 calibration complete",
+          "channel MHz1420 legacy format"
+        ],
+        par: 19,
+        baseXP: 0,
+        parBonusXP: 225,
+        referenceSolution: "(?<=on )\\d+(?= MHz)",
+        hint: "You need the number, but only in a specific context. Two zero-width assertions — one before and one after — can lock the match to exactly the right position.",
+        hintCost: 10,
+        conceptNote: "(?<=on ) and (?= MHz) are a lookbehind and lookahead working together. They create a contextual filter: only numbers sandwiched between 'on ' and ' MHz' are matched. The number itself is the only thing consumed.",
+        isSideChallenge: true,
+        isBoss: false
+      },
+
+      // ─── Boss Challenge 5-B ─────────────────────────────────────
+      {
+        id: "5-B",
+        title: "The Filter",
+        briefing: "The signal router needs to match transmission codes — exactly 3 uppercase letters — but only when preceded by TX: and NOT followed by :REVOKED. Revoked transmissions must be silently dropped.",
+        type: "match",
+        corpus: [
+          "TX:ARB dispatch confirmed",
+          "TX:QRZ dispatch confirmed",
+          "TX:NNV dispatch confirmed",
+          "TX:ARB:REVOKED access denied",
+          "TX:QRZ:REVOKED access denied",
+          "RX:ARB received and logged",
+          "TX:AR partial code error",
+          "TX:ARBX overlong code error"
+        ],
+        mustMatch: [
+          "TX:ARB dispatch confirmed",
+          "TX:QRZ dispatch confirmed",
+          "TX:NNV dispatch confirmed"
+        ],
+        mustNotMatch: [
+          "TX:ARB:REVOKED access denied",
+          "TX:QRZ:REVOKED access denied",
+          "RX:ARB received and logged",
+          "TX:AR partial code error",
+          "TX:ARBX overlong code error"
+        ],
+        par: 30,
+        baseXP: 200,
+        parBonusXP: 100,
+        referenceSolution: "(?<=TX:)[A-Z]{3}\\b(?!:REVOKED)",
+        hint: "You need a lookbehind for the prefix, an exact character count for the code, a word boundary to prevent partial matches, and a negative lookahead to exclude revoked entries.",
+        hintCost: 10,
+        conceptNote: "(?<=TX:)[A-Z]{3}\\b(?!:REVOKED) layers three boundary concepts: a lookbehind verifies the TX: prefix, \\b ensures the code is exactly 3 letters (not a substring of a longer code), and a negative lookahead excludes revoked transmissions. Each assertion narrows the match without consuming characters.",
+        isSideChallenge: false,
+        isBoss: true
+      }
+
+    ] // end challenges
+  },  // end world-5
+
+  // ═══════════════════════════════════════════════════════════
+  // WORLD 6 — The Source
+  // ═══════════════════════════════════════════════════════════
+  {
+    id: "world-6",
+    title: "The Source",
+    subtitle: "The signal speaks for itself.",
+    narrative: "The final layer of the transmission has been exposed. It's not just data — it's a language. Patterns that reference themselves, structures that repeat with purpose, and a grammar that was clearly designed to be decoded. Whatever sent this signal expected someone to find it. The team is silent. Everyone is watching your terminal.",
+    conceptsIntroduced: ["negative lookbehind (?<!...)", "backreferences \\1", "combined mastery"],
+    challenges: [
+
+      // ─── Challenge 6-1 ───────────────────────────────────────────
+      {
+        id: "6-1",
+        title: "Access Control",
+        briefing: "Sector lockdown reports contain the word LOCKED in every entry. But some sectors are UNLOCKED — and those should pass through freely. Match only the genuinely locked sectors.",
+        scenario: "The containment system needs to identify which sectors are sealed. UNLOCKED entries should be ignored — they're cleared for traffic. The word LOCKED appears in both, so simple matching won't work.",
+        learnMore: "A negative lookbehind (?<!...) asserts that a pattern does NOT precede the current position.\n\n(?<!UN)LOCKED matches LOCKED only when it is NOT preceded by UN. So 'LOCKED' matches, but the 'LOCKED' inside 'UNLOCKED' does not.\n\nLike all lookaround assertions, it's zero-width — it checks context without consuming characters. Negative lookbehind completes the set: you can now assert what must or must not appear on either side of your target.",
+        type: "match",
+        corpus: [
+          "SECTOR_A LOCKED down for analysis",
+          "SECTOR_B LOCKED down for analysis",
+          "SECTOR_C LOCKED down for analysis",
+          "SECTOR_D UNLOCKED and available",
+          "SECTOR_E UNLOCKED and available",
+          "SECTOR_F UNLOCKED and available"
+        ],
+        mustMatch: [
+          "SECTOR_A LOCKED down for analysis",
+          "SECTOR_B LOCKED down for analysis",
+          "SECTOR_C LOCKED down for analysis"
+        ],
+        mustNotMatch: [
+          "SECTOR_D UNLOCKED and available",
+          "SECTOR_E UNLOCKED and available",
+          "SECTOR_F UNLOCKED and available"
+        ],
+        par: 13,
+        baseXP: 125,
+        parBonusXP: 50,
+        referenceSolution: "(?<!UN)LOCKED",
+        hint: "LOCKED appears in every line — including the UNLOCKED ones. You need to exclude matches where specific characters come right before LOCKED.",
+        hintCost: 10,
+        conceptNote: "(?<!UN) is a negative lookbehind — it asserts that 'UN' does NOT precede the current position. (?<!UN)LOCKED matches the standalone word LOCKED but rejects the LOCKED inside UNLOCKED. This completes the lookaround toolkit: positive/negative, ahead/behind.",
+        isSideChallenge: false,
+        isBoss: false
+      },
+
+      // ─── Challenge 6-2 ───────────────────────────────────────────
+      {
+        id: "6-2",
+        title: "Duplicate Signal",
+        briefing: "Legitimate transmissions use a unique 3-letter code per line. Corrupted entries repeat the same code twice. Find the duplicates.",
+        scenario: "The deduplication filter is down. Entries where the same 3-letter code appears more than once are echo artifacts from a relay malfunction. They need to be flagged and removed.",
+        learnMore: "A backreference \\1 matches the exact same text that was captured by group 1.\n\n([A-Z]{3}).*\\1 captures a 3-letter code in group 1, then .* skips ahead, and \\1 requires the same three letters to appear again.\n\nThis is fundamentally different from [A-Z]{3}.*[A-Z]{3} — that would match any two 3-letter codes. A backreference enforces identity, not just structure.",
+        type: "match",
+        corpus: [
+          "ARB:send ARB:confirm duplicate",
+          "QRZ:send QRZ:confirm duplicate",
+          "NNV:send NNV:confirm duplicate",
+          "ARB:send QRZ:confirm routed",
+          "QRZ:send NNV:confirm routed",
+          "NNV:send ARB:confirm routed"
+        ],
+        mustMatch: [
+          "ARB:send ARB:confirm duplicate",
+          "QRZ:send QRZ:confirm duplicate",
+          "NNV:send NNV:confirm duplicate"
+        ],
+        mustNotMatch: [
+          "ARB:send QRZ:confirm routed",
+          "QRZ:send NNV:confirm routed",
+          "NNV:send ARB:confirm routed"
+        ],
+        par: 14,
+        baseXP: 125,
+        parBonusXP: 50,
+        referenceSolution: "([A-Z]{3}).*\\1",
+        hint: "You need to match lines where the same 3-letter code appears twice. Parentheses capture text — and there's a way to refer back to what was captured.",
+        hintCost: 10,
+        conceptNote: "([A-Z]{3}) captures a 3-letter code. \\1 is a backreference — it matches the exact same text captured by group 1. This enforces that the same code appears twice, not just any two codes. Identity, not structure.",
+        isSideChallenge: false,
+        isBoss: false
+      },
+
+      // ─── Challenge 6-3 ───────────────────────────────────────────
+      {
+        id: "6-3",
+        title: "Mirror Protocol",
+        briefing: "Valid message frames use a mirror format: a 3-letter code at the start and the same code at the end, wrapped around a hyphenated payload. Match only frames where the opening and closing codes are identical.",
+        scenario: "The frame validator requires that sender authentication tokens match the header code — a cryptographic echo built into the signal's grammar. Mismatched frames are forgeries.",
+        learnMore: "Backreferences work naturally with surrounding structure. ^([A-Z]{3}):\\w+-\\w+:\\1 captures the opening code, matches the payload structure, then requires the same code at the close.\n\nThe backreference doesn't just check 'three uppercase letters' — it checks for the exact same three letters in the exact same order. ARB only matches ARB, never QRZ.\n\nThis lets you validate structural symmetry — patterns that reference themselves.",
+        type: "match",
+        corpus: [
+          "ARB:data-link:ARB verified",
+          "QRZ:scan-deep:QRZ verified",
+          "NNV:ping-echo:NNV verified",
+          "ARB:data-link:QRZ mismatch",
+          "QRZ:scan-deep:NNV mismatch",
+          "ARB:data-link:arb case error"
+        ],
+        mustMatch: [
+          "ARB:data-link:ARB verified",
+          "QRZ:scan-deep:QRZ verified",
+          "NNV:ping-echo:NNV verified"
+        ],
+        mustNotMatch: [
+          "ARB:data-link:QRZ mismatch",
+          "QRZ:scan-deep:NNV mismatch",
+          "ARB:data-link:arb case error"
+        ],
+        par: 22,
+        baseXP: 125,
+        parBonusXP: 50,
+        referenceSolution: "^([A-Z]{3}):\\w+-\\w+:\\1",
+        hint: "The opening and closing codes must be identical — not just the same format. Capture the first one and reference it at the end.",
+        hintCost: 10,
+        conceptNote: "^([A-Z]{3}) captures the opening code. :\\w+-\\w+: matches the payload. \\1 at the end requires the exact same code — not just any 3-letter sequence. Case-sensitive: ARB doesn't match arb.",
+        isSideChallenge: false,
+        isBoss: false
+      },
+
+      // ─── Challenge 6-4 ───────────────────────────────────────────
+      {
+        id: "6-4",
+        title: "Full Spectrum",
+        briefing: "Valid scan entries start with SCAN:, followed by a band code (L or S), a 4-digit ID, a colon, and a status that is NOT FAIL. Match complete valid scan entries.",
+        scenario: "The final processing queue accepts only clean scans on active bands. Failed scans, invalid bands, and malformed IDs must all be rejected before the data enters the analysis pipeline.",
+        learnMore: "Complex real-world patterns combine multiple regex concepts in a single expression.\n\n^SCAN:[LS]\\d{4}:(?!FAIL)\\w+ uses: anchoring (^), character classes ([LS]), exact quantifiers (\\d{4}), negative lookahead ((?!FAIL)), and shorthand (\\w+).\n\nEach element eliminates a different class of invalid input. The pattern reads left to right like a checklist: correct prefix, valid band, right-length ID, non-failure status.",
+        type: "match",
+        corpus: [
+          "SCAN:L0042:PASS sector clear",
+          "SCAN:S1987:PASS sector clear",
+          "SCAN:L7741:DONE sector archived",
+          "SCAN:L0042:FAIL sector error",
+          "SCAN:X0042:PASS invalid band",
+          "SCAN:L42:PASS short ID",
+          "RELAY:L0042:PASS wrong prefix"
+        ],
+        mustMatch: [
+          "SCAN:L0042:PASS sector clear",
+          "SCAN:S1987:PASS sector clear",
+          "SCAN:L7741:DONE sector archived"
+        ],
+        mustNotMatch: [
+          "SCAN:L0042:FAIL sector error",
+          "SCAN:X0042:PASS invalid band",
+          "SCAN:L42:PASS short ID",
+          "RELAY:L0042:PASS wrong prefix"
+        ],
+        par: 27,
+        baseXP: 150,
+        parBonusXP: 75,
+        referenceSolution: "^SCAN:[LS]\\d{4}:(?!FAIL)\\w+",
+        hint: "Work left to right: anchor to start, constrain the band, enforce ID length, then use a negative lookahead to reject failures.",
+        hintCost: 10,
+        conceptNote: "^SCAN:[LS]\\d{4}:(?!FAIL)\\w+ is a five-concept pattern: ^ for anchoring, [LS] for character class, \\d{4} for exact count, (?!FAIL) for negative lookahead, and \\w+ for the status value. Each constraint eliminates a different invalid entry.",
+        isSideChallenge: false,
+        isBoss: false
+      },
+
+      // ─── Side Challenge 6-S ─────────────────────────────────────
+      {
+        id: "6-S",
+        title: "Temporal Echo",
+        briefing: "The signal contains timestamps where the hour and minute fields are identical — 03:03, 14:14, 22:22. These 'temporal echoes' are believed to be synchronization markers. Find them.",
+        type: "match",
+        corpus: [
+          "03:03:22 signal pulse detected",
+          "14:14:09 anomaly burst logged",
+          "22:22:55 sync marker recorded",
+          "03:14:22 background noise",
+          "14:03:09 calibration ping",
+          "22:07:55 routine scan"
+        ],
+        mustMatch: [
+          "03:03:22 signal pulse detected",
+          "14:14:09 anomaly burst logged",
+          "22:22:55 sync marker recorded"
+        ],
+        mustNotMatch: [
+          "03:14:22 background noise",
+          "14:03:09 calibration ping",
+          "22:07:55 routine scan"
+        ],
+        par: 16,
+        baseXP: 0,
+        parBonusXP: 250,
+        referenceSolution: "(\\d{2}):\\1:\\d{2}",
+        hint: "The hour and minute fields are the same two digits. Capture the first and require the second to be identical.",
+        hintCost: 10,
+        conceptNote: "(\\d{2}) captures a two-digit field. :\\1: requires the same digits to appear again after a colon. This detects structural repetition within the data — the signal referencing itself.",
+        isSideChallenge: true,
+        isBoss: false
+      },
+
+      // ─── Boss Challenge 6-B ─────────────────────────────────────
+      {
+        id: "6-B",
+        title: "The Rosetta Pattern",
+        briefing: "The final decoded message format: a protocol type (SIG or MSG), a 3-letter sender code, a payload, and the same sender code repeated as an authentication token. The full line must match exactly and end with :OK.",
+        type: "match",
+        corpus: [
+          "SIG:ARB-data_stream-ARB:OK",
+          "MSG:QRZ-relay_burst-QRZ:OK",
+          "SIG:NNV-deep_scan-NNV:OK",
+          "SIG:ARB-data_stream-QRZ:OK",
+          "MSG:QRZ-relay_burst-QRZ:FAIL",
+          "SIG:ARB-data_stream-ARB:OK extra",
+          "XMT:ARB-data_stream-ARB:OK",
+          "SIG:AB-data_stream-AB:OK"
+        ],
+        mustMatch: [
+          "SIG:ARB-data_stream-ARB:OK",
+          "MSG:QRZ-relay_burst-QRZ:OK",
+          "SIG:NNV-deep_scan-NNV:OK"
+        ],
+        mustNotMatch: [
+          "SIG:ARB-data_stream-QRZ:OK",
+          "MSG:QRZ-relay_burst-QRZ:FAIL",
+          "SIG:ARB-data_stream-ARB:OK extra",
+          "XMT:ARB-data_stream-ARB:OK",
+          "SIG:AB-data_stream-AB:OK"
+        ],
+        par: 32,
+        baseXP: 250,
+        parBonusXP: 125,
+        referenceSolution: "^(SIG|MSG):([A-Z]{3})-\\w+-\\2:OK$",
+        hint: "The protocol allows two types (alternation), the sender code appears twice (backreference), and the entire line must be validated (anchors). This pattern uses nearly everything you've learned.",
+        hintCost: 10,
+        conceptNote: "^(SIG|MSG):([A-Z]{3})-\\w+-\\2:OK$ is the capstone: ^ and $ from World 3, alternation and groups from World 4, and \\2 backreference from World 6. Group 1 handles the protocol type, group 2 captures the sender code, and \\2 enforces that the authentication token matches. Every concept in the campaign converges here.",
+        isSideChallenge: false,
+        isBoss: true
+      }
+
+    ] // end challenges
+  }  // end world-6
 
 ];   // end CAMPAIGN
+
+// ────────────────────────────────────────────────────
+//  REGULARCADE — CORPUS MATCH
+//  Pure skill drills. No narrative. No hints.
+//  STUB: Replace with GET /api/minigames?type=corpus_match in v2.
+// ────────────────────────────────────────────────────
+const ARCADE_CORPUS_MATCH = [
+  {
+    id: "cm-1",
+    title: "Email Addresses",
+    description: "Match valid email addresses. Reject everything else.",
+    type: "match",
+    corpus: [
+      "alice@example.com",
+      "bob.smith@company.org",
+      "admin@mail-server.net",
+      "not-an-email",
+      "@missing-user.com",
+      "spaces in@address.com",
+      "no-at-sign.com",
+      "user@.no-domain"
+    ],
+    mustMatch: [
+      "alice@example.com",
+      "bob.smith@company.org",
+      "admin@mail-server.net"
+    ],
+    mustNotMatch: [
+      "not-an-email",
+      "@missing-user.com",
+      "spaces in@address.com",
+      "no-at-sign.com",
+      "user@.no-domain"
+    ],
+    par: 14,
+    baseXP: 50,
+    parBonusXP: 25,
+    referenceSolution: "^\\S+@\\S+\\.\\w+$"
+  }
+];
+
+// ────────────────────────────────────────────────────
+//  REGULARCADE — TIMED DRILL
+//  Rapid-fire series. Timer runs continuously.
+//  STUB: Replace with GET /api/minigames?type=timed_drill in v2.
+// ────────────────────────────────────────────────────
+const ARCADE_TIMED_DRILLS = [
+  {
+    id: "td-1",
+    title: "Fundamentals Sprint",
+    description: "Six quick-fire challenges covering the basics. 90 seconds on the clock.",
+    timeLimitSeconds: 90,
+    baseXP: 100,
+    timeBonus: 50,
+    challenges: [
+      {
+        title: "Literal Match",
+        briefing: "Match the ERROR lines.",
+        corpus: [
+          "ERROR disk full",
+          "WARNING low memory",
+          "ERROR timeout",
+          "INFO startup complete",
+          "DEBUG cache hit",
+          "INFO ready"
+        ],
+        mustMatch: ["ERROR disk full", "ERROR timeout"],
+        mustNotMatch: ["WARNING low memory", "INFO startup complete", "DEBUG cache hit", "INFO ready"],
+        par: 5
+      },
+      {
+        title: "Wildcard Separator",
+        briefing: "Match LOG OK lines regardless of separator. Not BLOG or DIALOG.",
+        corpus: [
+          "LOG_OK system nominal",
+          "LOG-OK system checked",
+          "LOG OK system ready",
+          "LOG_FAIL system error",
+          "BLOG_OK external",
+          "DIALOG_OK popup"
+        ],
+        mustMatch: ["LOG_OK system nominal", "LOG-OK system checked", "LOG OK system ready"],
+        mustNotMatch: ["LOG_FAIL system error", "BLOG_OK external", "DIALOG_OK popup"],
+        par: 7
+      },
+      {
+        title: "Digit Run",
+        briefing: "Match entries with a numeric ID after id: — at least one digit.",
+        corpus: [
+          "id:4821 active",
+          "id:107 active",
+          "id:99034 active",
+          "id: missing",
+          "idx4821 wrong format",
+          "id:zero missing"
+        ],
+        mustMatch: ["id:4821 active", "id:107 active", "id:99034 active"],
+        mustNotMatch: ["id: missing", "idx4821 wrong format", "id:zero missing"],
+        par: 6
+      },
+      {
+        title: "Anchored Start",
+        briefing: "Match lines that start with PASS. Not BYPASS, COMPASS, or mid-line.",
+        corpus: [
+          "PASS unit test alpha",
+          "PASS unit test beta",
+          "PASS integration gamma",
+          "BYPASS security check",
+          "COMPASS calibrated",
+          "unit test PASS delta"
+        ],
+        mustMatch: ["PASS unit test alpha", "PASS unit test beta", "PASS integration gamma"],
+        mustNotMatch: ["BYPASS security check", "COMPASS calibrated", "unit test PASS delta"],
+        par: 5
+      },
+      {
+        title: "Character Class",
+        briefing: "Match zones A, B, and C only.",
+        corpus: [
+          "zone-A active",
+          "zone-B active",
+          "zone-C active",
+          "zone-D inactive",
+          "zone-X decommissioned",
+          "zone-1 numeric"
+        ],
+        mustMatch: ["zone-A active", "zone-B active", "zone-C active"],
+        mustNotMatch: ["zone-D inactive", "zone-X decommissioned", "zone-1 numeric"],
+        par: 10
+      },
+      {
+        title: "Escape Artist",
+        briefing: "Match lines containing a dollar amount.",
+        corpus: [
+          "price: $9.99",
+          "price: $14.50",
+          "price: $0.75",
+          "ratio: 9.99",
+          "version 14.50",
+          "score: 99/100"
+        ],
+        mustMatch: ["price: $9.99", "price: $14.50", "price: $0.75"],
+        mustNotMatch: ["ratio: 9.99", "version 14.50", "score: 99/100"],
+        par: 2
+      }
+    ]
+  }
+];
+
+// ────────────────────────────────────────────────────
+//  REGULARCADE — REGEX CROSSWORD
+//  Fill the grid so every row AND column satisfies its pattern.
+//  STUB: Replace with GET /api/minigames?type=crossword in v2.
+// ────────────────────────────────────────────────────
+const ARCADE_CROSSWORD = [
+  {
+    id: "cw-1",
+    title: "Binary Flip",
+    description: "A 2×2 warm-up. Fill each cell so rows and columns both match.",
+    rows: 2,
+    cols: 2,
+    rowPatterns: ["^1[^1]$", "^0[^0]$"],
+    colPatterns: ["^[01]{2}$", "^0[01]$"],
+    solution: [["1","0"],["0","1"]],
+    baseXP: 50,
+    difficulty: "Easy"
+  },
+  {
+    id: "cw-2",
+    title: "Hex Decode",
+    description: "Decode a 3×3 hex transmission. Alternation and character classes required.",
+    rows: 3,
+    cols: 3,
+    rowPatterns: ["^F[AE]D$", "^0+$", "^b[e-o]d$"],
+    colPatterns: ["^F\\d[a-f]$", "^(A0a|E0e)$", "^D0[a-d]$"],
+    solution: [["F","E","D"],["0","0","0"],["b","e","d"]],
+    baseXP: 100,
+    difficulty: "Medium"
+  },
+  {
+    id: "cw-3",
+    title: "Repeating Signal",
+    description: "A symmetric 3×3 grid. Grouped repetition meets negated classes.",
+    rows: 3,
+    cols: 3,
+    rowPatterns: ["^(A1)+A$", "^1[^A]1$", "^(A1)+A$"],
+    colPatterns: ["^A1A$", "^1[AB]1$", "^(A1)+A$"],
+    solution: [["A","1","A"],["1","B","1"],["A","1","A"]],
+    baseXP: 150,
+    difficulty: "Hard"
+  }
+];
 
 // ────────────────────────────────────────────────────
 //  LEADERBOARD STUB DATA
@@ -1352,6 +2018,688 @@ document.querySelectorAll("[data-goto='screen-regularcade']").forEach(btn => {
   btn.addEventListener("click", updateRegularcadeMsg);
 });
 
+// Corpus Match tile
+document.getElementById("arcade-tile-corpus-match").addEventListener("click", () => {
+  renderCorpusMatchList();
+  goTo("screen-corpus-match");
+});
+
+// ────────────────────────────────────────────────────
+//  REGULARCADE — CORPUS MATCH LIST
+// ────────────────────────────────────────────────────
+function renderCorpusMatchList() {
+  const progress = loadProgress();
+  const container = document.getElementById("corpus-match-list");
+  container.innerHTML = "";
+
+  ARCADE_CORPUS_MATCH.forEach(game => {
+    const completed = progress.completedChallenges.includes(game.id);
+    const score = progress.scores[game.id];
+
+    const card = document.createElement("div");
+    card.className = "arcade-game-card" + (completed ? " completed" : "");
+
+    const title = document.createElement("div");
+    title.className = "arcade-game-title";
+    title.textContent = game.title;
+    card.appendChild(title);
+
+    const desc = document.createElement("div");
+    desc.className = "arcade-game-desc";
+    desc.textContent = game.description;
+    card.appendChild(desc);
+
+    const meta = document.createElement("div");
+    meta.className = "arcade-game-meta mono";
+    meta.textContent = `par: ${game.par}  |  ${game.baseXP} XP` + (completed && score ? `  |  your best: ${score.charCount} chars` : "");
+    card.appendChild(meta);
+
+    const playBtn = document.createElement("button");
+    playBtn.className = "btn btn-primary btn-sm";
+    playBtn.textContent = completed ? "PLAY AGAIN" : "PLAY";
+    playBtn.addEventListener("click", () => loadChallenge(game.id, true));
+    card.appendChild(playBtn);
+
+    container.appendChild(card);
+  });
+}
+
+// ────────────────────────────────────────────────────
+//  REGULARCADE — TIMED DRILL
+// ────────────────────────────────────────────────────
+
+// Timed Drill tile
+document.getElementById("arcade-tile-timed-drill").addEventListener("click", () => {
+  renderTimedDrillList();
+  goTo("screen-timed-drill");
+});
+
+function renderTimedDrillList() {
+  const progress = loadProgress();
+  const container = document.getElementById("timed-drill-list");
+  container.innerHTML = "";
+
+  ARCADE_TIMED_DRILLS.forEach(drill => {
+    const completed = progress.completedChallenges.includes(drill.id);
+    const score = progress.scores[drill.id];
+
+    const card = document.createElement("div");
+    card.className = "arcade-game-card" + (completed ? " completed" : "");
+
+    const title = document.createElement("div");
+    title.className = "arcade-game-title";
+    title.textContent = drill.title;
+    card.appendChild(title);
+
+    const desc = document.createElement("div");
+    desc.className = "arcade-game-desc";
+    desc.textContent = drill.description;
+    card.appendChild(desc);
+
+    const meta = document.createElement("div");
+    meta.className = "arcade-game-meta mono";
+    meta.textContent = `${drill.challenges.length} challenges  |  ${drill.timeLimitSeconds}s  |  ${drill.baseXP} XP`
+      + (completed && score ? `  |  best: ${score.time}s` : "");
+    card.appendChild(meta);
+
+    const playBtn = document.createElement("button");
+    playBtn.className = "btn btn-primary btn-sm";
+    playBtn.textContent = completed ? "PLAY AGAIN" : "PLAY";
+    playBtn.addEventListener("click", () => startTimedDrill(drill));
+    card.appendChild(playBtn);
+
+    container.appendChild(card);
+  });
+}
+
+// ── Timed drill gameplay state ──
+let tdDrill = null;       // current drill data
+let tdStep = 0;           // current sub-challenge index
+let tdTimer = null;        // interval id
+let tdStartTime = 0;       // Date.now() when started
+let tdElapsed = 0;         // seconds elapsed
+let tdSolvedCount = 0;     // how many sub-challenges solved
+let tdAtParCount = 0;      // how many solved at/under par
+
+function startTimedDrill(drill) {
+  tdDrill = drill;
+  tdStep = 0;
+  tdSolvedCount = 0;
+  tdAtParCount = 0;
+
+  document.getElementById("td-header-title").textContent = drill.title;
+  document.getElementById("td-progress-fill").style.width = "0%";
+
+  goTo("screen-timed-drill-play");
+  loadTimedDrillStep();
+
+  // Start timer
+  tdStartTime = Date.now();
+  tdElapsed = 0;
+  clearInterval(tdTimer);
+  tdTimer = setInterval(tickTimedDrill, 250);
+  tickTimedDrill();
+
+  // Focus input
+  document.getElementById("td-regex-input").focus();
+}
+
+function tickTimedDrill() {
+  tdElapsed = Math.floor((Date.now() - tdStartTime) / 1000);
+  const remaining = Math.max(0, tdDrill.timeLimitSeconds - tdElapsed);
+  const min = Math.floor(remaining / 60);
+  const sec = remaining % 60;
+  const timerEl = document.getElementById("td-timer");
+  timerEl.textContent = `${min}:${sec.toString().padStart(2, "0")}`;
+
+  // Color warnings
+  timerEl.classList.remove("warning", "danger");
+  if (remaining <= 10) timerEl.classList.add("danger");
+  else if (remaining <= 30) timerEl.classList.add("warning");
+
+  if (remaining <= 0) {
+    clearInterval(tdTimer);
+    finishTimedDrill(false);
+  }
+}
+
+function loadTimedDrillStep() {
+  const ch = tdDrill.challenges[tdStep];
+  const total = tdDrill.challenges.length;
+
+  document.getElementById("td-step-label").textContent = `${tdStep + 1} / ${total}`;
+  document.getElementById("td-step-title").textContent = ch.title;
+  document.getElementById("td-briefing-text").textContent = ch.briefing || "";
+  document.getElementById("td-progress-fill").style.width = `${(tdStep / total) * 100}%`;
+
+  // Render corpus
+  const container = document.getElementById("td-corpus-lines");
+  container.innerHTML = "";
+  ch.corpus.forEach(line => {
+    const div = document.createElement("div");
+    div.classList.add("corpus-line");
+    if (ch.mustMatch.includes(line)) div.classList.add("must-match");
+    if (ch.mustNotMatch.includes(line)) div.classList.add("must-not-match");
+    div.textContent = line;
+    container.appendChild(div);
+  });
+
+  // Reset input
+  const input = document.getElementById("td-regex-input");
+  input.value = "";
+  document.getElementById("td-char-counter").textContent = `0 chars | par: ${ch.par}`;
+  document.getElementById("td-char-counter").className = "char-counter mono";
+  document.getElementById("td-regex-error").textContent = "";
+  document.getElementById("td-locked-in").textContent = "";
+  document.getElementById("td-locked-in").classList.remove("visible");
+  input.focus();
+}
+
+function renderTimedDrillCorpus(ch, regex) {
+  const container = document.getElementById("td-corpus-lines");
+  container.innerHTML = "";
+  ch.corpus.forEach(line => {
+    const div = document.createElement("div");
+    div.classList.add("corpus-line");
+    const isMustMatch = ch.mustMatch.includes(line);
+    const isMustNotMatch = ch.mustNotMatch.includes(line);
+    if (isMustMatch) div.classList.add("must-match");
+    if (isMustNotMatch) div.classList.add("must-not-match");
+
+    let matched = false;
+    if (regex) {
+      try { matched = regex.test(line); } catch (_) {}
+    }
+    if (regex) {
+      if (isMustMatch) div.classList.add(matched ? "line-matched" : "line-unmatched");
+      else if (isMustNotMatch) div.classList.add(matched ? "line-matched" : "line-ok");
+      div.innerHTML = highlightLine(line, regex);
+    } else {
+      div.textContent = line;
+    }
+    container.appendChild(div);
+  });
+}
+
+// Live input handler for timed drill
+document.getElementById("td-regex-input").addEventListener("input", () => {
+  if (!tdDrill) return;
+  const ch = tdDrill.challenges[tdStep];
+  const pattern = document.getElementById("td-regex-input").value;
+
+  const errorEl = document.getElementById("td-regex-error");
+  const counterEl = document.getElementById("td-char-counter");
+  const lockedInEl = document.getElementById("td-locked-in");
+
+  if (pattern === "") {
+    renderTimedDrillCorpus(ch, null);
+    errorEl.textContent = "";
+    counterEl.textContent = `0 chars | par: ${ch.par}`;
+    counterEl.className = "char-counter mono";
+    lockedInEl.textContent = "";
+    lockedInEl.classList.remove("visible");
+    return;
+  }
+
+  let regex;
+  try {
+    regex = new RegExp(pattern);
+    errorEl.textContent = "";
+  } catch (e) {
+    errorEl.textContent = `Invalid: ${e.message}`;
+    renderTimedDrillCorpus(ch, null);
+    lockedInEl.classList.remove("visible");
+    return;
+  }
+
+  renderTimedDrillCorpus(ch, regex);
+
+  const len = pattern.length;
+  const atPar = len <= ch.par;
+  counterEl.textContent = `${len} chars | par: ${ch.par}`;
+  counterEl.className = "char-counter mono" + (len < ch.par ? " under-par" : atPar ? " at-par" : "");
+
+  // Check if solved
+  const matchPasses = ch.mustMatch.every(s => regex.test(s));
+  const excludePasses = ch.mustNotMatch.every(s => !regex.test(s));
+
+  if (matchPasses && excludePasses) {
+    lockedInEl.textContent = "LOCKED IN ✓";
+    lockedInEl.classList.add("visible");
+
+    tdSolvedCount++;
+    if (atPar) tdAtParCount++;
+
+    // Flash and advance
+    const layout = document.querySelector("#screen-timed-drill-play .challenge-layout");
+    layout.classList.add("td-flash");
+    setTimeout(() => layout.classList.remove("td-flash"), 400);
+
+    setTimeout(() => {
+      tdStep++;
+      if (tdStep >= tdDrill.challenges.length) {
+        clearInterval(tdTimer);
+        finishTimedDrill(true);
+      } else {
+        loadTimedDrillStep();
+      }
+    }, 350);
+
+    // Disable input briefly to prevent double-advance
+    document.getElementById("td-regex-input").disabled = true;
+    setTimeout(() => {
+      document.getElementById("td-regex-input").disabled = false;
+    }, 400);
+  } else {
+    lockedInEl.textContent = "";
+    lockedInEl.classList.remove("visible");
+  }
+});
+
+function finishTimedDrill(completed) {
+  clearInterval(tdTimer);
+
+  const totalChallenges = tdDrill.challenges.length;
+  const timeUsed = tdElapsed;
+  const underTime = completed && timeUsed < tdDrill.timeLimitSeconds;
+
+  // Calculate XP
+  const progress = loadProgress();
+  const prevScore = progress.scores[tdDrill.id];
+  const isFirstCompletion = !progress.completedChallenges.includes(tdDrill.id);
+
+  let baseXP = completed ? tdDrill.baseXP : Math.round(tdDrill.baseXP * (tdSolvedCount / totalChallenges));
+  let timeBonusXP = underTime ? tdDrill.timeBonus : 0;
+  let xpEarned = baseXP + timeBonusXP;
+
+  // Only award XP on first completion; time bonus on reattempt if first time under time
+  let xpToGrant = 0;
+  if (isFirstCompletion) {
+    xpToGrant = xpEarned;
+  } else if (underTime && prevScore && !prevScore.underTime) {
+    xpToGrant = timeBonusXP;
+  }
+
+  if (completed && isFirstCompletion) {
+    progress.completedChallenges.push(tdDrill.id);
+  }
+  progress.xp += xpToGrant;
+
+  if (!prevScore || (completed && timeUsed < (prevScore.time || Infinity))) {
+    progress.scores[tdDrill.id] = {
+      xp: (prevScore ? prevScore.xp : 0) + xpToGrant,
+      time: timeUsed,
+      solved: tdSolvedCount,
+      atPar: tdAtParCount,
+      underTime
+    };
+  } else if (xpToGrant > 0 && prevScore) {
+    prevScore.xp += xpToGrant;
+    prevScore.underTime = underTime;
+  }
+  saveProgress(progress);
+
+  // Show results
+  document.getElementById("td-result-label").textContent = completed ? "DRILL COMPLETE" : "TIME'S UP";
+  document.getElementById("td-result-label").className = "result-status-label" + (completed ? " success-label" : " failure-label");
+  document.getElementById("td-result-title").textContent = tdDrill.title;
+  document.getElementById("td-result-completed").textContent = `${tdSolvedCount} / ${totalChallenges}`;
+  document.getElementById("td-result-time").textContent = `${timeUsed}s`;
+  document.getElementById("td-result-at-par").textContent = `${tdAtParCount} / ${tdSolvedCount}`;
+
+  const isReplay = xpToGrant === 0;
+  document.getElementById("td-xp-base").textContent = isReplay ? "+0" : `+${baseXP}`;
+  const timeRow = document.getElementById("td-xp-time-row");
+  if (timeBonusXP > 0 && !isReplay) {
+    timeRow.style.display = "";
+    document.getElementById("td-xp-time").textContent = `+${timeBonusXP}`;
+  } else if (timeBonusXP > 0 && xpToGrant === timeBonusXP) {
+    // Reattempt earned time bonus
+    document.getElementById("td-xp-base").textContent = "+0";
+    timeRow.style.display = "";
+    document.getElementById("td-xp-time").textContent = `+${timeBonusXP}`;
+  } else {
+    timeRow.style.display = "none";
+  }
+  document.getElementById("td-xp-total").textContent = `+${xpToGrant}`;
+
+  document.getElementById("td-result-continue-btn").onclick = () => {
+    renderTimedDrillList();
+    goTo("screen-timed-drill");
+  };
+
+  goTo("screen-timed-drill-results");
+}
+
+// Quit button
+document.getElementById("td-back-btn").addEventListener("click", () => {
+  clearInterval(tdTimer);
+  renderTimedDrillList();
+  goTo("screen-timed-drill");
+});
+
+// ────────────────────────────────────────────────────
+//  REGULARCADE — REGEX CROSSWORD
+// ────────────────────────────────────────────────────
+
+// Crossword tile
+document.getElementById("arcade-tile-crossword").addEventListener("click", () => {
+  renderCrosswordList();
+  goTo("screen-crossword");
+});
+
+function renderCrosswordList() {
+  const progress = loadProgress();
+  const container = document.getElementById("crossword-list");
+  container.innerHTML = "";
+
+  ARCADE_CROSSWORD.forEach(puzzle => {
+    const completed = progress.completedChallenges.includes(puzzle.id);
+
+    const card = document.createElement("div");
+    card.className = "arcade-game-card" + (completed ? " completed" : "");
+
+    const title = document.createElement("div");
+    title.className = "arcade-game-title";
+    title.textContent = puzzle.title;
+    card.appendChild(title);
+
+    const desc = document.createElement("div");
+    desc.className = "arcade-game-desc";
+    desc.textContent = puzzle.description;
+    card.appendChild(desc);
+
+    const meta = document.createElement("div");
+    meta.className = "arcade-game-meta mono";
+    meta.textContent = `${puzzle.rows}×${puzzle.cols}  |  ${puzzle.difficulty}  |  ${puzzle.baseXP} XP`;
+    card.appendChild(meta);
+
+    const playBtn = document.createElement("button");
+    playBtn.className = "btn btn-primary btn-sm";
+    playBtn.textContent = completed ? "PLAY AGAIN" : "PLAY";
+    playBtn.addEventListener("click", () => startCrossword(puzzle));
+    card.appendChild(playBtn);
+
+    container.appendChild(card);
+  });
+}
+
+// ── Crossword gameplay state ──
+let cwPuzzle = null;
+let cwCells = [];   // 2D array of input elements
+let cwErrors = 0;   // track total wrong attempts for stats
+
+function startCrossword(puzzle) {
+  cwPuzzle = puzzle;
+  cwCells = [];
+  cwErrors = 0;
+
+  document.getElementById("cw-header-title").textContent = puzzle.title;
+  document.getElementById("cw-error-count").textContent = "";
+
+  const grid = document.getElementById("cw-grid");
+  grid.innerHTML = "";
+
+  const table = document.createElement("table");
+  table.className = "cw-table";
+
+  // Header row: empty corner + column patterns
+  const thead = document.createElement("thead");
+  const headerRow = document.createElement("tr");
+  headerRow.appendChild(document.createElement("th")); // empty corner
+  for (let c = 0; c < puzzle.cols; c++) {
+    const th = document.createElement("th");
+    th.className = "cw-pattern-col mono";
+    th.textContent = puzzle.colPatterns[c];
+    headerRow.appendChild(th);
+  }
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  // Body rows: row pattern + cells
+  const tbody = document.createElement("tbody");
+  for (let r = 0; r < puzzle.rows; r++) {
+    const tr = document.createElement("tr");
+
+    const patternCell = document.createElement("td");
+    patternCell.className = "cw-pattern-row mono";
+    patternCell.textContent = puzzle.rowPatterns[r];
+    tr.appendChild(patternCell);
+
+    const rowCells = [];
+    for (let c = 0; c < puzzle.cols; c++) {
+      const td = document.createElement("td");
+      td.className = "cw-cell-wrap";
+
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "cw-cell mono";
+      input.maxLength = 1;
+      input.autocomplete = "off";
+      input.autocorrect = "off";
+      input.autocapitalize = "off";
+      input.spellcheck = false;
+      input.dataset.row = r;
+      input.dataset.col = c;
+
+      input.addEventListener("input", onCwCellInput);
+      input.addEventListener("keydown", onCwCellKeydown);
+
+      td.appendChild(input);
+      tr.appendChild(td);
+      rowCells.push(input);
+    }
+    cwCells.push(rowCells);
+    tbody.appendChild(tr);
+  }
+  table.appendChild(tbody);
+  grid.appendChild(table);
+
+  goTo("screen-crossword-play");
+
+  // Focus first cell
+  setTimeout(() => cwCells[0][0].focus(), 50);
+}
+
+function onCwCellInput(e) {
+  const input = e.target;
+  const r = +input.dataset.row;
+  const c = +input.dataset.col;
+
+  // Allow only single printable character
+  if (input.value.length > 1) {
+    input.value = input.value.slice(-1);
+  }
+
+  validateCwGrid();
+
+  // Auto-advance to next empty cell
+  if (input.value.length === 1) {
+    advanceCwFocus(r, c);
+  }
+}
+
+function onCwCellKeydown(e) {
+  const r = +e.target.dataset.row;
+  const c = +e.target.dataset.col;
+
+  if (e.key === "Backspace" && e.target.value === "") {
+    // Move to previous cell
+    e.preventDefault();
+    const prev = getPrevCwCell(r, c);
+    if (prev) {
+      prev.value = "";
+      prev.focus();
+      validateCwGrid();
+    }
+  } else if (e.key === "ArrowUp" && r > 0) {
+    e.preventDefault();
+    cwCells[r - 1][c].focus();
+  } else if (e.key === "ArrowDown" && r < cwPuzzle.rows - 1) {
+    e.preventDefault();
+    cwCells[r + 1][c].focus();
+  } else if (e.key === "ArrowLeft" && c > 0) {
+    e.preventDefault();
+    cwCells[r][c - 1].focus();
+  } else if (e.key === "ArrowRight" && c < cwPuzzle.cols - 1) {
+    e.preventDefault();
+    cwCells[r][c + 1].focus();
+  }
+}
+
+function advanceCwFocus(fromR, fromC) {
+  // Find next empty cell (row-major order)
+  for (let r = fromR; r < cwPuzzle.rows; r++) {
+    const startC = (r === fromR) ? fromC + 1 : 0;
+    for (let c = startC; c < cwPuzzle.cols; c++) {
+      if (!cwCells[r][c].value) {
+        cwCells[r][c].focus();
+        return;
+      }
+    }
+  }
+  // Wrap around
+  for (let r = 0; r <= fromR; r++) {
+    const endC = (r === fromR) ? fromC : cwPuzzle.cols;
+    for (let c = 0; c < endC; c++) {
+      if (!cwCells[r][c].value) {
+        cwCells[r][c].focus();
+        return;
+      }
+    }
+  }
+}
+
+function getPrevCwCell(r, c) {
+  if (c > 0) return cwCells[r][c - 1];
+  if (r > 0) return cwCells[r - 1][cwPuzzle.cols - 1];
+  return null;
+}
+
+function validateCwGrid() {
+  const puzzle = cwPuzzle;
+  let allFilled = true;
+  let allCorrect = true;
+
+  // Reset all cell states
+  for (let r = 0; r < puzzle.rows; r++) {
+    for (let c = 0; c < puzzle.cols; c++) {
+      cwCells[r][c].classList.remove("cw-valid", "cw-invalid");
+      if (!cwCells[r][c].value) allFilled = false;
+    }
+  }
+
+  // Check rows
+  const rowValid = [];
+  for (let r = 0; r < puzzle.rows; r++) {
+    const rowStr = cwCells[r].map(cell => cell.value).join("");
+    if (rowStr.length < puzzle.cols) {
+      rowValid.push(null); // incomplete
+      continue;
+    }
+    try {
+      const re = new RegExp(puzzle.rowPatterns[r]);
+      rowValid.push(re.test(rowStr));
+    } catch (_) {
+      rowValid.push(false);
+    }
+  }
+
+  // Check columns
+  const colValid = [];
+  for (let c = 0; c < puzzle.cols; c++) {
+    let colStr = "";
+    let complete = true;
+    for (let r = 0; r < puzzle.rows; r++) {
+      const v = cwCells[r][c].value;
+      if (!v) { complete = false; break; }
+      colStr += v;
+    }
+    if (!complete) {
+      colValid.push(null);
+      continue;
+    }
+    try {
+      const re = new RegExp(puzzle.colPatterns[c]);
+      colValid.push(re.test(colStr));
+    } catch (_) {
+      colValid.push(false);
+    }
+  }
+
+  // Apply cell styling based on row/col validity
+  for (let r = 0; r < puzzle.rows; r++) {
+    for (let c = 0; c < puzzle.cols; c++) {
+      if (!cwCells[r][c].value) continue;
+      const rOk = rowValid[r];
+      const cOk = colValid[c];
+      if (rOk === null || cOk === null) continue; // incomplete row or col
+      if (rOk && cOk) {
+        cwCells[r][c].classList.add("cw-valid");
+      } else {
+        cwCells[r][c].classList.add("cw-invalid");
+        allCorrect = false;
+      }
+    }
+  }
+
+  if (!allFilled) allCorrect = false;
+
+  if (allFilled && allCorrect) {
+    setTimeout(() => finishCrossword(), 300);
+  }
+}
+
+function finishCrossword() {
+  const puzzle = cwPuzzle;
+  const progress = loadProgress();
+  const isFirstCompletion = !progress.completedChallenges.includes(puzzle.id);
+
+  let xpToGrant = 0;
+  if (isFirstCompletion) {
+    xpToGrant = puzzle.baseXP;
+    progress.completedChallenges.push(puzzle.id);
+  }
+  progress.xp += xpToGrant;
+
+  if (!progress.scores[puzzle.id]) {
+    progress.scores[puzzle.id] = { xp: xpToGrant };
+  } else if (xpToGrant > 0) {
+    progress.scores[puzzle.id].xp += xpToGrant;
+  }
+  saveProgress(progress);
+
+  // Show results
+  document.getElementById("cw-result-label").textContent = "PUZZLE COMPLETE";
+  document.getElementById("cw-result-label").className = "result-status-label success-label";
+  document.getElementById("cw-result-title").textContent = puzzle.title;
+  document.getElementById("cw-result-grid").textContent = `${puzzle.rows}×${puzzle.cols}`;
+  document.getElementById("cw-result-difficulty").textContent = puzzle.difficulty;
+  document.getElementById("cw-xp-base").textContent = isFirstCompletion ? `+${puzzle.baseXP}` : "+0";
+  document.getElementById("cw-xp-total").textContent = `+${xpToGrant}`;
+
+  const replayNote = document.getElementById("cw-replay-note");
+  if (!isFirstCompletion) {
+    replayNote.textContent = "XP already earned for this puzzle.";
+    replayNote.style.display = "";
+  } else {
+    replayNote.style.display = "none";
+  }
+
+  document.getElementById("cw-result-continue-btn").onclick = () => {
+    renderCrosswordList();
+    goTo("screen-crossword");
+  };
+
+  goTo("screen-crossword-results");
+}
+
+// Quit button
+document.getElementById("cw-back-btn").addEventListener("click", () => {
+  renderCrosswordList();
+  goTo("screen-crossword");
+});
+
 // ────────────────────────────────────────────────────
 //  TITLE SCREEN XP BADGE
 // ────────────────────────────────────────────────────
@@ -1422,6 +2770,28 @@ const MAP_LAYOUT = {
       "4-4": { x: 700 + WORLD_SPACING * 4, y: 300 },
       "4-S": { x: 700 + WORLD_SPACING * 4, y: 460, side: true },
       "4-B": { x: 860 + WORLD_SPACING * 4, y: 300, boss: true }
+    }
+  },
+  "world-5": {
+    worldNode: { x: 120 + WORLD_SPACING * 5, y: 300 },
+    challenges: {
+      "5-1": { x: 280 + WORLD_SPACING * 5, y: 300 },
+      "5-2": { x: 420 + WORLD_SPACING * 5, y: 300 },
+      "5-3": { x: 560 + WORLD_SPACING * 5, y: 300 },
+      "5-4": { x: 700 + WORLD_SPACING * 5, y: 300 },
+      "5-S": { x: 700 + WORLD_SPACING * 5, y: 460, side: true },
+      "5-B": { x: 860 + WORLD_SPACING * 5, y: 300, boss: true }
+    }
+  },
+  "world-6": {
+    worldNode: { x: 120 + WORLD_SPACING * 6, y: 300 },
+    challenges: {
+      "6-1": { x: 280 + WORLD_SPACING * 6, y: 300 },
+      "6-2": { x: 420 + WORLD_SPACING * 6, y: 300 },
+      "6-3": { x: 560 + WORLD_SPACING * 6, y: 300 },
+      "6-4": { x: 700 + WORLD_SPACING * 6, y: 300 },
+      "6-S": { x: 700 + WORLD_SPACING * 6, y: 460, side: true },
+      "6-B": { x: 860 + WORLD_SPACING * 6, y: 300, boss: true }
     }
   }
 };
@@ -1674,7 +3044,7 @@ function scrollMapToNextChallenge(progress) {
   const svgEl = document.getElementById("map-svg");
   // Convert SVG coordinate to pixel position within the rendered SVG element
   const svgWidth = svgEl.getBoundingClientRect().width || svgEl.clientWidth;
-  const viewBoxWidth = 4700;
+  const viewBoxWidth = 6500;
   const scale = svgWidth / viewBoxWidth;
   const pixelX = targetX * scale;
   // Center the target in the viewport
@@ -1688,38 +3058,45 @@ function scrollMapToNextChallenge(progress) {
 let activeChallengeId = null;
 let hintUsed = false;
 let hintRevealed = false;
+let arcadeMode = false;
 
 function findChallenge(id) {
   for (const world of CAMPAIGN) {
     const ch = world.challenges.find(c => c.id === id);
     if (ch) return { world, challenge: ch };
   }
+  // Search arcade corpus match games
+  const arcadeCh = ARCADE_CORPUS_MATCH.find(c => c.id === id);
+  if (arcadeCh) return { world: null, challenge: arcadeCh };
   return null;
 }
 
-function loadChallenge(challengeId) {
+function loadChallenge(challengeId, isArcade = false) {
   const found = findChallenge(challengeId);
   if (!found) return;
   const { world, challenge } = found;
 
   activeChallengeId = challengeId;
+  arcadeMode   = isArcade;
   hintUsed     = false;
   hintRevealed = false;
 
   const progress = loadProgress();
 
   // Header
-  document.getElementById("challenge-world-title").textContent = world.title;
+  document.getElementById("challenge-world-title").textContent = arcadeMode ? "CORPUS MATCH" : world.title;
   document.getElementById("challenge-xp").textContent = `XP: ${progress.xp}`;
+  document.getElementById("challenge-back-btn").textContent = arcadeMode ? "← ARCADE" : "← MAP";
 
   // Meta
-  document.getElementById("challenge-id").textContent = challenge.id;
+  document.getElementById("challenge-id").textContent = arcadeMode ? "" : challenge.id;
   document.getElementById("challenge-title").textContent = challenge.title;
   document.getElementById("challenge-type-badge").textContent = challenge.type.toUpperCase();
 
   // Briefing + scenario
   const briefingEl = document.getElementById("briefing-text");
-  briefingEl.innerHTML = escapeHtml(challenge.briefing) +
+  const briefingSource = challenge.briefing || challenge.description || "";
+  briefingEl.innerHTML = escapeHtml(briefingSource) +
     (challenge.scenario
       ? `<span class="briefing-scenario">${escapeHtml(challenge.scenario)}</span>`
       : "");
@@ -1730,7 +3107,7 @@ function loadChallenge(challengeId) {
   const learnPanel   = document.getElementById("learn-more-panel");
   const learnToggle  = document.getElementById("learn-more-toggle");
   const learnChevron = document.getElementById("learn-more-chevron");
-  const showLearn = !challenge.isBoss && !!challenge.learnMore;
+  const showLearn = !arcadeMode && !challenge.isBoss && !!challenge.learnMore;
   learnSection.hidden = !showLearn;
   if (showLearn) {
     learnText.textContent = challenge.learnMore;
@@ -1751,11 +3128,18 @@ function loadChallenge(challengeId) {
   document.getElementById("locked-in").textContent = "";
   document.getElementById("locked-in").classList.remove("visible");
 
-  // Hint
-  const hintCostEl = document.getElementById("hint-cost");
-  hintCostEl.textContent = `−${challenge.hintCost}pts`;
-  document.getElementById("hint-btn").disabled = false;
-  document.getElementById("hint-panel").hidden = true;
+  // Hint — hide for arcade mode
+  const hintSection = document.getElementById("hint-btn");
+  if (arcadeMode) {
+    hintSection.hidden = true;
+    document.getElementById("hint-panel").hidden = true;
+  } else {
+    hintSection.hidden = false;
+    const hintCostEl = document.getElementById("hint-cost");
+    hintCostEl.textContent = `−${challenge.hintCost}pts`;
+    document.getElementById("hint-btn").disabled = false;
+    document.getElementById("hint-panel").hidden = true;
+  }
 
   goTo("screen-challenge");
 }
@@ -1887,8 +3271,13 @@ document.getElementById("test-btn").addEventListener("click", () => {
 
 // Back button
 document.getElementById("challenge-back-btn").addEventListener("click", () => {
-  renderMap();
-  goTo("screen-map");
+  if (arcadeMode) {
+    renderCorpusMatchList();
+    goTo("screen-corpus-match");
+  } else {
+    renderMap();
+    goTo("screen-map");
+  }
 });
 
 function submitAttempt() {
@@ -1905,20 +3294,44 @@ function submitAttempt() {
   }
 
   if (result.passed) {
-    // Save progress
+    // Save progress — only award new XP
     const progress = loadProgress();
-    if (!progress.completedChallenges.includes(challenge.id)) {
+    const prevScore = progress.scores[challenge.id];
+    const isFirstCompletion = !progress.completedChallenges.includes(challenge.id);
+
+    // Calculate how much NEW XP to actually grant
+    // Campaign: XP only on first completion, no reattempt bonuses (reference solution is shown)
+    // Arcade: XP on first completion + par bonus on first at-par reattempt
+    let xpToGrant = 0;
+    if (isFirstCompletion) {
+      xpToGrant = result.xpAwarded;
+    } else if (arcadeMode && result.atPar && prevScore && !prevScore.atPar) {
+      xpToGrant = challenge.parBonusXP;
+    }
+
+    if (isFirstCompletion) {
       progress.completedChallenges.push(challenge.id);
     }
-    progress.xp += result.xpAwarded;
-    progress.scores[challenge.id] = {
-      xp: result.xpAwarded,
-      regexUsed: pattern,
-      charCount: result.charCount,
-      hintUsed
-    };
+    progress.xp += xpToGrant;
+
+    // Update stored score if this attempt is better (shorter) or first
+    if (!prevScore || result.charCount < prevScore.charCount) {
+      progress.scores[challenge.id] = {
+        xp: (prevScore ? prevScore.xp : 0) + xpToGrant,
+        regexUsed: pattern,
+        charCount: result.charCount,
+        atPar: result.atPar,
+        hintUsed
+      };
+    } else if (xpToGrant > 0) {
+      // Same or worse length but earned par bonus — update xp and atPar flag
+      prevScore.xp += xpToGrant;
+      prevScore.atPar = result.atPar;
+    }
     saveProgress(progress);
 
+    // Pass the actual XP granted to the success screen
+    result.xpGranted = xpToGrant;
     showSuccess(challenge, pattern, result, progress);
   } else {
     showFailure(challenge, result);
@@ -1929,27 +3342,44 @@ function submitAttempt() {
 //  SUCCESS SCREEN
 // ────────────────────────────────────────────────────
 function showSuccess(challenge, pattern, result, progress) {
-  document.getElementById("success-challenge-id").textContent = `${challenge.id} — ${challenge.title}`;
-  document.getElementById("concept-note-text").textContent = challenge.conceptNote;
+  document.getElementById("success-challenge-id").textContent = arcadeMode
+    ? challenge.title
+    : `${challenge.id} — ${challenge.title}`;
 
-  // Reference solution card
+  const debriefCard = document.getElementById("concept-debrief-card");
+  if (arcadeMode) {
+    debriefCard.hidden = true;
+  } else {
+    debriefCard.hidden = false;
+    document.getElementById("concept-note-text").textContent = challenge.conceptNote;
+  }
+
+  // Reference solution card — hide for arcade mode
   const refCard = document.getElementById("reference-solution-card");
   const refCode = document.getElementById("reference-solution-code");
-  if (challenge.referenceSolution) {
+  if (!arcadeMode && challenge.referenceSolution) {
     refCode.textContent = challenge.referenceSolution;
     refCard.hidden = false;
   } else {
     refCard.hidden = true;
   }
 
-  // XP rows
-  document.getElementById("xp-base-val").textContent   = `+${challenge.baseXP}`;
-  document.getElementById("xp-challenge-total").textContent = `+${result.xpAwarded}`;
+  // XP rows — show actual granted XP
+  const xpGranted = result.xpGranted !== undefined ? result.xpGranted : result.xpAwarded;
+  const isReplay = xpGranted === 0;
+
+  document.getElementById("xp-base-val").textContent = isReplay ? "+0" : `+${challenge.baseXP}`;
+  document.getElementById("xp-challenge-total").textContent = `+${xpGranted}`;
   document.getElementById("xp-running-total").textContent   = `${progress.xp}`;
 
   // Par bonus row
   const parRow = document.getElementById("xp-par-row");
-  if (result.atPar && challenge.parBonusXP > 0) {
+  if (result.atPar && challenge.parBonusXP > 0 && !isReplay) {
+    parRow.classList.add("visible");
+    document.getElementById("xp-par-val").textContent = `+${challenge.parBonusXP}`;
+  } else if (result.atPar && xpGranted === challenge.parBonusXP) {
+    // Reattempt that just earned par bonus
+    document.getElementById("xp-base-val").textContent = "+0";
     parRow.classList.add("visible");
     document.getElementById("xp-par-val").textContent = `+${challenge.parBonusXP}`;
   } else {
@@ -1958,7 +3388,7 @@ function showSuccess(challenge, pattern, result, progress) {
 
   // Hint penalty row
   const hintRow = document.getElementById("xp-hint-row");
-  if (result.hintPenalty > 0) {
+  if (!isReplay && result.hintPenalty > 0) {
     hintRow.classList.add("visible");
     document.getElementById("xp-hint-val").textContent = `−${result.hintPenalty}`;
   } else {
@@ -1971,25 +3401,30 @@ function showSuccess(challenge, pattern, result, progress) {
   parLineEl.className   = "par-line mono" + (result.charCount < challenge.par ? " under-par" : result.charCount === challenge.par ? " at-par" : "");
 
   // Animate XP total
-  animateCountUp(document.getElementById("xp-challenge-total"), 0, result.xpAwarded, 600, "+");
-  animateCountUp(document.getElementById("xp-running-total"),   progress.xp - result.xpAwarded, progress.xp, 1000, "");
+  animateCountUp(document.getElementById("xp-challenge-total"), 0, xpGranted, 600, "+");
+  animateCountUp(document.getElementById("xp-running-total"),   progress.xp - xpGranted, progress.xp, 1000, "");
 
   // Wire continue button
-  const nextChallenge = getNextChallenge(challenge.id);
   const continueBtn = document.getElementById("success-continue-btn");
 
-  // Check if this was the boss
-  if (challenge.isBoss) {
-    continueBtn.textContent = "WORLD COMPLETE →";
-    continueBtn.onclick = () => {
-      showWorldComplete(findChallenge(challenge.id).world, progress);
-    };
-  } else if (nextChallenge) {
-    continueBtn.textContent = "CONTINUE →";
-    continueBtn.onclick = () => loadChallenge(nextChallenge.id);
+  if (arcadeMode) {
+    continueBtn.textContent = "BACK TO ARCADE →";
+    continueBtn.onclick = () => { renderCorpusMatchList(); goTo("screen-corpus-match"); };
   } else {
-    continueBtn.textContent = "BACK TO MAP →";
-    continueBtn.onclick = () => { renderMap(); goTo("screen-map"); };
+    const nextChallenge = getNextChallenge(challenge.id);
+    // Check if this was the boss
+    if (challenge.isBoss) {
+      continueBtn.textContent = "WORLD COMPLETE →";
+      continueBtn.onclick = () => {
+        showWorldComplete(findChallenge(challenge.id).world, progress);
+      };
+    } else if (nextChallenge) {
+      continueBtn.textContent = "CONTINUE →";
+      continueBtn.onclick = () => loadChallenge(nextChallenge.id);
+    } else {
+      continueBtn.textContent = "BACK TO MAP →";
+      continueBtn.onclick = () => { renderMap(); goTo("screen-map"); };
+    }
   }
 
   goTo("screen-success");
@@ -2018,7 +3453,9 @@ function animateCountUp(el, from, to, duration, prefix) {
 //  FAILURE SCREEN
 // ────────────────────────────────────────────────────
 function showFailure(challenge, result) {
-  document.getElementById("failure-challenge-id").textContent = `${challenge.id} — ${challenge.title}`;
+  document.getElementById("failure-challenge-id").textContent = arcadeMode
+    ? challenge.title
+    : `${challenge.id} — ${challenge.title}`;
 
   const details = [];
   if (!result.matchPasses) {
@@ -2038,19 +3475,25 @@ function showFailure(challenge, result) {
   }
   document.getElementById("failure-details").innerHTML = details.join("<br>");
 
-  // Hint
-  const hintCostEl = document.getElementById("failure-hint-cost");
-  hintCostEl.textContent = `−${challenge.hintCost}pts`;
+  // Hint — hide for arcade mode
+  const failHintBtn = document.getElementById("failure-hint-btn");
+  if (arcadeMode) {
+    failHintBtn.hidden = true;
+  } else {
+    failHintBtn.hidden = false;
+    const hintCostEl = document.getElementById("failure-hint-cost");
+    hintCostEl.textContent = `−${challenge.hintCost}pts`;
 
-  document.getElementById("failure-hint-btn").disabled = hintUsed;
-  document.getElementById("failure-hint-btn").onclick = () => {
-    hintUsed = true;
-    hintRevealed = true;
-    document.getElementById("hint-text").textContent = challenge.hint;
-    document.getElementById("hint-panel").hidden = false;
-    document.getElementById("hint-btn").disabled = true;
-    goTo("screen-challenge");
-  };
+    failHintBtn.disabled = hintUsed;
+    failHintBtn.onclick = () => {
+      hintUsed = true;
+      hintRevealed = true;
+      document.getElementById("hint-text").textContent = challenge.hint;
+      document.getElementById("hint-panel").hidden = false;
+      document.getElementById("hint-btn").disabled = true;
+      goTo("screen-challenge");
+    };
+  }
 
   document.getElementById("failure-retry-btn").onclick = () => goTo("screen-challenge");
 
